@@ -15,20 +15,12 @@ class EnvWrapper:
         os.environ[key] = value
 
     @property
-    def DB_NAME(self):
-        return os.getenv("db_name")
-
-    @property
-    def DB_CONN(self):
-        return os.getenv("db_conn")
-
-    @property
     def WEB_APP_PORT(self):
         return int(os.getenv("PORT"))
 
     @property
-    def HMAC_SECRET(self):
-        return os.getenv("hmac_secret")
+    def TWITCH_HMAC_SECRET(self):
+        return os.getenv("twitch_hmac_secret")
 
     @property
     def TWITCH_APP_ID(self):
@@ -36,16 +28,20 @@ class EnvWrapper:
 
     @property
     def TWITCH_APP_SECRET(self):
-        return os.getenv("twitch_app_token")
+        return os.getenv("twitch_app_secret")
 
     @property
-    def OAUTH_TOKEN(self):
-        return os.getenv("twitch_oauth_token")
+    def GRIMM_SUBDOMAIN(self):
+        return os.getenv("grimm_subdomain")
 
     @property
-    def EVENTSUB_CALLBACK(self):
-        return os.getenv("twitch_app_callback_endpoint")
+    def SPOTIFY_APP_ID(self):
+        return os.getenv("spotify_app_id")
 
     @property
-    def EVENTSUB_AUTH(self):
-        return os.getenv("twitch_auth_endpoint")
+    def SPOTIFY_APP_SECRET(self):
+        return os.getenv("spotify_app_secret")
+
+    @property
+    def REDIS_HOST(self):
+        return os.getenv("redis_host")

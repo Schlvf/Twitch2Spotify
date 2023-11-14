@@ -4,6 +4,11 @@ nodeenv
 node_modules
 package-lock.json
 
+#Tunnel
+node-tunnel/
+*.sh
+
+
 *.mp4
 
 # vscode

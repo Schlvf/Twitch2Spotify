@@ -1,0 +1,12 @@
+node_modules
+node-tunnel
+nodeenv
+venv
+.gitignore
+.flake8
+.dockerignore
+.pre-commit-config.yaml
+Dockerfile
+LICENSE
+README.md
+.github
