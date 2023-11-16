@@ -7,6 +7,8 @@ from API.routers.spotify import spotify_router
 from API.routers.twitch import eventsub_router
 from Core.redis_controller import RedisHandler
 
+# from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
+
 app = FastAPI()
 app.include_router(eventsub_router.router)
 app.include_router(spotify_router.router)
@@ -25,6 +27,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# app.add_middleware(HTTPSRedirectMiddleware)
 
 
 @app.get("/")

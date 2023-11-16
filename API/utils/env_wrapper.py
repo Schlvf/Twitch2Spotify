@@ -45,3 +45,15 @@ class EnvWrapper:
     @property
     def REDIS_HOST(self):
         return os.getenv("redis_host")
+
+    @property
+    def SSL_KEY_FILE(self):
+        return os.getenv("ssl_key_file")
+
+    @property
+    def SSL_CERT_FILE(self):
+        return os.getenv("ssl_cert_file")
+
+    @property
+    def ENV(self):
+        return os.getenv("ENV")
