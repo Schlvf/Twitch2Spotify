@@ -20,6 +20,7 @@ class RewardField(BaseModel, extra="allow"):
 
 
 class EventInfo(BaseModel, extra="allow"):
+    id: str | None = None
     broadcaster_user_id: str | None = None
     reward: RewardField | None = None
     user_input: str | None = None

@@ -44,10 +44,10 @@ def authenticate_hmac(request: Request, rawbody: str):
 
 
 def check_dup_events(event: Event):
-    dup = RedisHandler().get_pair(name=event.subscription.id)
+    dup = RedisHandler().get_pair(name=event.event.id)
     if dup:
         return True
-    RedisHandler().set_pair(name=event.subscription.id, value=1, expiration=300)
+    RedisHandler().set_pair(name=event.event.id, value=1, expiration=300)
 
 
 def get_oauth_params():
