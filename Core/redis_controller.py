@@ -37,7 +37,7 @@ class RedisHandler:
 
     @time_diff
     def set_dict(self, name: str, payload: dict):
-        res = self.redis_client.hmset(name=name, mapping=payload)
+        res = self.redis_client.hset(name=name, mapping=payload)
         return res
 
     @time_diff
