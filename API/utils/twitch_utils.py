@@ -105,6 +105,8 @@ def get_channel_id(channel_name: str):
     }
     response = RestHandler.make_request(method="GET", url=url, headers=headers)
     user_data = response.json()
+    if not user_data.get("data"):
+        return
     print("Client id obtained")
 
     user_cache = UserCache(

@@ -6,6 +6,10 @@ URL = "https://api.twitch.tv/helix/eventsub/subscriptions"
 
 def subscribe_to_event(event_name: str, channel_name: str):
     user_id = twitch_utils.get_channel_id(channel_name=channel_name)
+
+    if not user_id:
+        return
+
     body = twitch_utils.get_subscription_body(user_id=user_id, event_name=event_name)
     response = RestHandler.make_request(
         method="POST",

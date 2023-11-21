@@ -65,6 +65,7 @@ class SpotifyAPIHelper:
         if res.status_code == 401:
             print("Token invalid...")
         print("ERROR LOG", res.json())
+        return res.json()
 
 
 def refresh_access_token(user_cache: UserCache):
@@ -104,6 +105,9 @@ def get_new_access_token(code: str, user_name: str):
         headers=get_auth_headers(),
         body=body,
     )
+
+    if res.get("error"):
+        return res
 
     user_cache = RedisHandler().get_dict(name=user_name, class_type=UserCache)
     if not user_cache:

@@ -73,7 +73,7 @@ async def twitch_sub_event(response: Response, event_name: str, channel_name: st
         channel_name=channel_name,
     ):
         response.status_code = 400
-        return
+        return {"Status": "Subscrition denied"}
     return {"Status": "{event_name} Subscribed successfully"}
 
 

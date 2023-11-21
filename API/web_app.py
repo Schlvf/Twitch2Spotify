@@ -14,8 +14,7 @@ app.include_router(eventsub_router.router)
 app.include_router(spotify_router.router)
 
 origins = [
-    "http://localhost",
-    "http://localhost:5000",
+    "*",
 ]
 origin_regex = ".*:*"
 
