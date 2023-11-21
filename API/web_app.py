@@ -17,7 +17,7 @@ origins = [
     "http://localhost",
     "http://localhost:5000",
 ]
-origin_regex = ".*:5000"
+origin_regex = ".*:*"
 
 app.add_middleware(
     CORSMiddleware,
