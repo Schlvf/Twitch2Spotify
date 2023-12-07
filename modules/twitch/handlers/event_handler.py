@@ -1,5 +1,5 @@
-from API.handlers.spotify import spotify_handler
-from API.models.twitch.events import Event
+from modules.spotify.handlers import spotify_handler
+from modules.twitch.models.events import Event
 
 
 def solve_event(event: Event):

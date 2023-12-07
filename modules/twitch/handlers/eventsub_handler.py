@@ -1,5 +1,5 @@
-from API.utils import twitch_utils
 from Core.rest_helper.request_utils import RestHandler
+from modules.twitch.utils import twitch_utils
 
 URL = "https://api.twitch.tv/helix/eventsub/subscriptions"
 

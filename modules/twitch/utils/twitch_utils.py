@@ -4,12 +4,12 @@ import urllib.parse
 
 from fastapi import Request
 
-from API.models.twitch.cache import OauthToken
-from API.models.twitch.events import Event
-from API.models.user.cache import UserCache
 from API.utils.env_wrapper import EnvWrapper
-from Core.redis_controller import RedisHandler
 from Core.rest_helper.request_utils import RestHandler
+from modules.redis.handlers.redis_controller import RedisHandler
+from modules.redis.models.integrations_cache import UserCache
+from modules.twitch.models.events import Event
+from modules.twitch.models.oauh_token import OauthToken
 
 TWITCH_MESSAGE_ID = "twitch-eventsub-message-id"
 TWITCH_MESSAGE_TIMESTAMP = "twitch-eventsub-message-timestamp"

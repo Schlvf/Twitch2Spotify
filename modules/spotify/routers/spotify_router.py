@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
-from API.handlers.spotify import spotify_handler
 from API.utils import general_utils
-from API.utils import spotify_utils
+from modules.spotify.handlers import spotify_handler
+from modules.spotify.utils import spotify_utils
 
 router = APIRouter(prefix="/spotify")
 

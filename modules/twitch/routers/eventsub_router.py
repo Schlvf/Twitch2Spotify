@@ -3,10 +3,10 @@ from fastapi import Request
 from fastapi import Response
 from fastapi.responses import PlainTextResponse
 
-from API.handlers.twitch import event_handler
-from API.handlers.twitch import eventsub_handler
-from API.models.twitch.events import Event
-from API.utils import twitch_utils
+from modules.twitch.handlers import event_handler
+from modules.twitch.handlers import eventsub_handler
+from modules.twitch.models.events import Event
+from modules.twitch.utils import twitch_utils
 
 router = APIRouter(prefix="/eventsub")
 
@@ -53,7 +53,6 @@ async def callback_endpoint(
 async def user_authorization():
     url = "https://id.twitch.tv/oauth2/authorize"
     params = twitch_utils.get_user_auth_params()
-    print(params)
     return {"redirect_url": url + twitch_utils.url_encode_params(params=params)}
 
 

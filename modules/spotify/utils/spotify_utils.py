@@ -2,10 +2,10 @@ import base64
 import re
 import time
 
-from API.models.user.cache import UserCache
 from API.utils.env_wrapper import EnvWrapper
-from Core.redis_controller import RedisHandler
 from Core.rest_helper.request_utils import RestHandler
+from modules.redis.handlers.redis_controller import RedisHandler
+from modules.redis.models.integrations_cache import UserCache
 
 REDIRECT_URI = EnvWrapper().GRIMM_SUBDOMAIN + "/spotify/user_authorize"
 
