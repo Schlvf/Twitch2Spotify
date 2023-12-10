@@ -57,3 +57,7 @@ class EnvWrapper:
     @property
     def ENV(self):
         return os.getenv("ENV")
+
+    @property
+    def SUDO_AUTH(self):
+        return os.getenv("sudo_auth")

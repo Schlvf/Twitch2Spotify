@@ -70,6 +70,16 @@ class RedisHandler:
     @time_diff
     def count(self):
         res = self.redis_client.dbsize()
-        if res:
-            print(f"\nTotal elements: {res} \n")
         return res
+
+    @time_diff
+    def get_keys(self, pattern: str, count: int):
+        res = self.redis_client.scan_iter(match=pattern, count=count)
+        return list(res)
+
+    @time_diff
+    def delete_keys(self, pattern: str, count: int):
+        res = self.redis_client.scan_iter(match=pattern, count=count)
+        for key in res:
+            self.redis_client.delete(key)
+        return list(res)
