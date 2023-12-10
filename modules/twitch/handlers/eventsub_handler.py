@@ -17,11 +17,11 @@ def subscribe_to_event(event_name: str, channel_name: str):
         headers=twitch_utils.get_headers(),
         json=body,
     )
-    print(response.json())
-    print(response.status_code)
     if response.status_code in [200, 202, 409]:
         print("Successfully subscribed to ", event_name)
         return True
+    print(response.json())
+    print(response.status_code)
 
 
 def unsubscribe_to_all():

@@ -73,7 +73,7 @@ async def twitch_sub_event(response: Response, event_name: str, channel_name: st
     ):
         response.status_code = 400
         return {"Status": "Subscrition denied"}
-    return {"Status": "{event_name} Subscribed successfully"}
+    return {"Status": f"{event_name} Subscribed successfully"}
 
 
 @router.delete("/subscribe")
@@ -81,4 +81,4 @@ async def twitch_unsub_event(response: Response):
     if not eventsub_handler.unsubscribe_to_all():
         response.status_code = 400
         return
-    return {"Status": "{event_name} Unsubscribed successfully"}
+    return {"Status": "Unsubscribed successfully"}

@@ -7,7 +7,7 @@ from Core.rest_helper.request_utils import RestHandler
 from modules.redis.handlers.redis_controller import RedisHandler
 from modules.redis.models.integrations_cache import UserCache
 
-REDIRECT_URI = EnvWrapper().GRIMM_SUBDOMAIN + "/spotify/user_authorize"
+REDIRECT_URI = f"{EnvWrapper().GRIMM_SUBDOMAIN}/spotify/user_authorize"
 
 
 def get_user_auth_params():
@@ -40,9 +40,9 @@ class SpotifyAPIHelper:
         if not headers:
             user_cache = RedisHandler().get_dict(name=user_name, class_type=UserCache)
             if not user_cache:
-                raise Exception("***SPOTIFY REQUEST WITHOUT USER CACHE***")
+                print("***SPOTIFY REQUEST WITHOUT USER CACHE***")
             if not user_cache.spotify_auth_token:
-                raise Exception(
+                print(
                     "Spotify API attempt without approval, please authorize the extension...",
                 )
             if token_is_expired(user_cache=user_cache):
@@ -129,14 +129,14 @@ def get_auth_headers():
         EnvWrapper().SPOTIFY_APP_SECRET,
     )
     return {
-        "Authorization": "Basic " + str_to_base64(auth_str),
+        "Authorization": f"Basic {str_to_base64(auth_str)}",
         "Content-Type": "application/x-www-form-urlencoded",
     }
 
 
 def get_headers(user_cache: UserCache):
     return {
-        "Authorization": "Bearer " + user_cache.spotify_auth_token,
+        "Authorization": f"Bearer {user_cache.spotify_auth_token}",
     }
 
 
@@ -148,8 +148,8 @@ def str_to_base64(text: str):
 
 def parse_link_to_uri(link: str):
     split = link.split(sep="/")
-    id = re.findall("([a-zA-Z0-9]+)", split.pop())
-    return "spotify:track:" + id[0]
+    id = re.findall("([a-zA-Z0-9]+)", split[-1])
+    return f"spotify:track:{id[0]}"
 
 
 def token_is_expired(user_cache: UserCache):

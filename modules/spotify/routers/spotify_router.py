@@ -16,7 +16,7 @@ async def user_authorization(code: str = None, error: str = None):
 
     url = "https://accounts.spotify.com/authorize"
     params = spotify_utils.get_user_auth_params()
-    return {"redirect_url": url + general_utils.url_encode_params(params=params)}
+    return {"redirect_url": f"{url}{general_utils.url_encode_params(params=params)}"}
 
 
 @router.post("/access_token")

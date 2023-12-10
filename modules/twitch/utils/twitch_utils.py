@@ -19,11 +19,7 @@ HMAC_PREFIX = "sha256="
 
 def get_hmac_message(request: Request, rawbody: str):
     if request:
-        return (
-            request.headers.get(TWITCH_MESSAGE_ID)
-            + request.headers.get(TWITCH_MESSAGE_TIMESTAMP)
-            + rawbody
-        )
+        return f"{request.headers.get(TWITCH_MESSAGE_ID)}{request.headers.get(TWITCH_MESSAGE_TIMESTAMP)}{rawbody}"
 
 
 def get_hmac(secret, message):
@@ -38,7 +34,7 @@ def get_hmac(secret, message):
 
 def authenticate_hmac(request: Request, rawbody: str):
     message = get_hmac_message(request=request, rawbody=rawbody)
-    hmac = HMAC_PREFIX + get_hmac(EnvWrapper().TWITCH_HMAC_SECRET, message=message)
+    hmac = f"{HMAC_PREFIX}{get_hmac(EnvWrapper().TWITCH_HMAC_SECRET, message=message)}"
     signature = request.headers.get(TWITCH_MESSAGE_SIGNATURE)
     return signature == hmac
 
@@ -83,14 +79,14 @@ def get_access_token():
 def get_user_auth_params():
     return {
         "client_id": EnvWrapper().TWITCH_APP_ID,
-        "redirect_uri": EnvWrapper().GRIMM_SUBDOMAIN + "/eventsub/twitch_auth",
+        "redirect_uri": f"{EnvWrapper().GRIMM_SUBDOMAIN}/eventsub/twitch_auth",
         "response_type": "code",
         "scope": "channel:read:redemptions",
     }
 
 
 def url_encode_params(params: dict):
-    return "?" + urllib.parse.urlencode(params)
+    return f"?{urllib.parse.urlencode(params)}"
 
 
 def get_channel_id(channel_name: str):
@@ -99,9 +95,9 @@ def get_channel_id(channel_name: str):
         return UserCache(**user_cache).twitch_channel_id
 
     params = {"login": channel_name}
-    url = "https://api.twitch.tv/helix/users" + url_encode_params(params=params)
+    url = f"https://api.twitch.tv/helix/users{url_encode_params(params=params)}"
     headers = {
-        "Authorization": "Bearer " + get_access_token(),
+        "Authorization": f"Bearer {get_access_token()}",
         "Client-Id": EnvWrapper().TWITCH_APP_ID,
     }
     response = RestHandler.make_request(method="GET", url=url, headers=headers)
@@ -129,7 +125,7 @@ def get_subscription_body(user_id: str, event_name: str):
         "condition": {f"{event_info['type']}": f"{user_id}"},
         "transport": {
             "method": "webhook",
-            "callback": EnvWrapper().GRIMM_SUBDOMAIN + "/eventsub/callback",
+            "callback": f"{EnvWrapper().GRIMM_SUBDOMAIN}/eventsub/callback",
             "secret": EnvWrapper().TWITCH_HMAC_SECRET,
         },
     }
@@ -137,7 +133,7 @@ def get_subscription_body(user_id: str, event_name: str):
 
 def get_headers():
     return {
-        "Authorization": "Bearer " + get_access_token(),
+        "Authorization": f"Bearer {get_access_token()}",
         "Client-Id": EnvWrapper().TWITCH_APP_ID,
         "Content-Type": "application/json",
     }
