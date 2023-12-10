@@ -21,10 +21,8 @@ async def user_authorization(code: str = None, error: str = None):
 
 @router.post("/access_token")
 async def generate_access_token(code: str, user_name: str):
-    res = spotify_utils.get_new_access_token(code=code, user_name=user_name)
+    spotify_utils.get_new_access_token(code=code, user_name=user_name)
 
-    if res:
-        return general_utils.get_unsuccessful_auth_message()
     return general_utils.get_successful_auth_message()
 
 

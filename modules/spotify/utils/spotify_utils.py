@@ -2,6 +2,8 @@ import base64
 import re
 import time
 
+from fastapi import HTTPException
+
 from API.utils.env_wrapper import EnvWrapper
 from Core.rest_helper.request_utils import RestHandler
 from modules.redis.handlers.redis_controller import RedisHandler
@@ -107,11 +109,17 @@ def get_new_access_token(code: str, user_name: str):
     )
 
     if res.get("error"):
-        return res
+        raise HTTPException(
+            status_code=400,
+            detail="There was a problem with the code - Please try again",
+        )
 
     user_cache = RedisHandler().get_dict(name=user_name, class_type=UserCache)
     if not user_cache:
-        raise Exception("NO USER CACHE FOUND")
+        raise HTTPException(
+            status_code=403,
+            detail="Forbidden - Please re-authorize Twitch first",
+        )
 
     user_cache.spotify_auth_token = res.get("access_token")
     user_cache.spotify_refresh_token = res.get("refresh_token")
