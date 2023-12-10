@@ -1,3 +1,5 @@
+from fastapi import HTTPException
+
 from Core.rest_helper.request_utils import RestHandler
 from modules.twitch.utils import twitch_utils
 
@@ -8,7 +10,10 @@ def subscribe_to_event(event_name: str, channel_name: str):
     user_id = twitch_utils.get_channel_id(channel_name=channel_name)
 
     if not user_id:
-        return
+        raise HTTPException(
+            status_code=403,
+            detail="Make sure the username is correct and try again",
+        )
 
     body = twitch_utils.get_subscription_body(user_id=user_id, event_name=event_name)
     response = RestHandler.make_request(
@@ -19,9 +24,15 @@ def subscribe_to_event(event_name: str, channel_name: str):
     )
     if response.status_code in [200, 202, 409]:
         print("Successfully subscribed to ", event_name)
-        return True
+        return
+
     print(response.json())
     print(response.status_code)
+
+    raise HTTPException(
+        status_code=400,
+        detail="There was a problem, please try again",
+    )
 
 
 def unsubscribe_to_all():

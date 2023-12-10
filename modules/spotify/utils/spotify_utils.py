@@ -42,11 +42,13 @@ class SpotifyAPIHelper:
         if not headers:
             user_cache = RedisHandler().get_dict(name=user_name, class_type=UserCache)
             if not user_cache:
-                print("***SPOTIFY REQUEST WITHOUT USER CACHE***")
+                print("***Spotify request without user cache***")
+                return
             if not user_cache.spotify_auth_token:
                 print(
-                    "Spotify API attempt without approval, please authorize the extension...",
+                    "***Spotify request without authorization code***",
                 )
+                return
             if token_is_expired(user_cache=user_cache):
                 print("Spotify token expired, refreshing...")
                 user_cache = refresh_access_token(user_cache=user_cache)

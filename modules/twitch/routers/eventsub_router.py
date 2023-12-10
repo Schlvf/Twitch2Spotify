@@ -66,13 +66,11 @@ async def twitch_auth(request: Request):
 
 
 @router.post("/subscribe")
-async def twitch_sub_event(response: Response, event_name: str, channel_name: str):
-    if not eventsub_handler.subscribe_to_event(
+async def twitch_sub_event(event_name: str, channel_name: str):
+    eventsub_handler.subscribe_to_event(
         event_name=event_name,
         channel_name=channel_name,
-    ):
-        response.status_code = 400
-        return {"Status": "Subscrition denied"}
+    )
     return {"Status": f"{event_name} Subscribed successfully"}
 
 
