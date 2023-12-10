@@ -28,4 +28,4 @@ async def get_keys(pattern: str | None = None, count: int | None = 1):
 @router.delete("/key")
 async def delete_keys(pattern: str | None = None, count: int | None = 1):
     res = RedisHandler().delete_keys(pattern=pattern, count=count)
-    return {"Deleted": res}
+    return {"Status": f"Deleted {res} documents"}

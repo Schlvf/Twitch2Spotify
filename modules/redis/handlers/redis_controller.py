@@ -79,7 +79,7 @@ class RedisHandler:
 
     @time_diff
     def delete_keys(self, pattern: str, count: int):
-        res = self.redis_client.scan_iter(match=pattern, count=count)
+        res = list(self.redis_client.scan_iter(match=pattern, count=count))
         for key in res:
             self.redis_client.delete(key)
-        return list(res)
+        return len(res)
