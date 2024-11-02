@@ -62,7 +62,13 @@ class SpotifyAPIHelper:
         )
         print(">>>", res.status_code)
         if res.status_code == 200:
-            return res.json()
+            # checking for string due to spotify api issue
+            try:
+                return res.json()
+            except Exception as e:
+                print ("Spotify API is still fucked")
+                return
+            # return res.json()
         if res.status_code == 204:
             print("Song added to queue")
             return

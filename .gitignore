@@ -1,3 +1,6 @@
+#DO domain keys
+*.pem
+
 #Pastas
 pastas.json
 nodeenv
