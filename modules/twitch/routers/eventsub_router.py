@@ -1,10 +1,7 @@
-from fastapi import APIRouter
-from fastapi import Request
-from fastapi import Response
+from fastapi import APIRouter, Request, Response
 from fastapi.responses import PlainTextResponse
 
-from modules.twitch.handlers import event_handler
-from modules.twitch.handlers import eventsub_handler
+from modules.twitch.handlers import event_handler, eventsub_handler
 from modules.twitch.models.events import Event
 from modules.twitch.utils import twitch_utils
 

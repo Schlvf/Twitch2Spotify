@@ -1,7 +1,6 @@
 from typing import Annotated
 
-from fastapi import Header
-from fastapi import HTTPException
+from fastapi import Header, HTTPException
 
 from API.utils.env_wrapper import EnvWrapper
 

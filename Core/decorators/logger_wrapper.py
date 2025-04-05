@@ -3,7 +3,6 @@ from functools import wraps
 
 from Core.custom_logger import get_logger_instance
 
-
 logger = get_logger_instance("Custom Logger", "INFO")
 
 

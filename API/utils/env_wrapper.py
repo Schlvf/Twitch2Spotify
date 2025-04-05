@@ -7,7 +7,7 @@ class EnvWrapper:
     def __new__(cls):
         if not hasattr(cls, "instance"):
             load_dotenv()
-            cls.instance = super(EnvWrapper, cls).__new__(cls)
+            cls.instance = super().__new__(cls)
 
         return cls.instance
 

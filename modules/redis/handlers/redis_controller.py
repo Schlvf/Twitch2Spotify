@@ -12,7 +12,7 @@ class RedisHandler:
     def __new__(cls):
         """Singleton handler"""
         if not hasattr(cls, "instance"):
-            cls.instance = super(RedisHandler, cls).__new__(cls)
+            cls.instance = super().__new__(cls)
             cls.redis_client = Redis(
                 host=EnvWrapper().REDIS_HOST,
                 port=6379,

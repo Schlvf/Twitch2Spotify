@@ -1,5 +1,4 @@
-from fastapi import APIRouter
-from fastapi import Depends
+from fastapi import APIRouter, Depends
 
 from API.utils.router_dependencies import sudo_auth
 from modules.redis.handlers.redis_controller import RedisHandler

@@ -48,7 +48,6 @@ def get_color_by_level(level):
 
 
 class CustomFormatter(logging.Formatter):
-
     """Please use this side for the colors https://ansi.gabebanks.net/"""
 
     """Base format -> '%(asctime)s - %(name)s - %(levelname)s - %(message)-60s (%(filename)s:%(lineno)d)'"""
