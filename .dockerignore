@@ -1,12 +1,51 @@
-node_modules
-node-tunnel
-nodeenv
-venv
 .gitignore
 .flake8
-.dockerignore
 .pre-commit-config.yaml
-Dockerfile
+
 LICENSE
 README.md
 .github
+
+
+# Exclude Python cache files
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Exclude virtual environments
+env/
+venv/
+*.venv
+
+# Exclude local development files
+*.db
+*.sqlite3
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.swp
+*.swo
+
+# Exclude IDE and editor settings
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Exclude system files
+.DS_Store
+Thumbs.db
+
+# Exclude Docker-related files
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+# Exclude test files
+tests/
+
+# Exclude the .env file
+.env
