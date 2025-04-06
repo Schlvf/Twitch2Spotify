@@ -5,8 +5,6 @@ from modules.redis.routers import redis_router
 from modules.spotify.routers import spotify_router
 from modules.twitch.routers import eventsub_router
 
-# from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
-
 app = FastAPI()
 app.include_router(eventsub_router.router)
 app.include_router(spotify_router.router)
@@ -25,13 +23,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# app.add_middleware(HTTPSRedirectMiddleware)
-
-
-@app.get("/")
-async def root():
-    return {"message": "Hello world"}
 
 
 @app.get("/ping")
