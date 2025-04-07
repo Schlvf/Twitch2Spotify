@@ -12,10 +12,10 @@ services:
     depends_on:
       - grimm-redis
     build: .
-    expose:
-      - ${PORT}
-    ports:
-      - "${PORT}:${PORT}"
+    # expose:
+    #   - ${PORT}
+    # ports:
+    #   - "${PORT}:${PORT}"
     restart: always
 
   zrok-share:
