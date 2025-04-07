@@ -2,7 +2,8 @@ from typing import TypeVar
 
 from redis import Redis
 
-from core import EnvWrapper, time_diff
+from core import EnvWrapper
+from core import time_diff
 
 T = TypeVar("T")
 

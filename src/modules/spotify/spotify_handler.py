@@ -1,4 +1,5 @@
-from .spotify_utils import make_spotify_request, parse_link_to_uri
+from .spotify_utils import make_spotify_request
+from .spotify_utils import parse_link_to_uri
 
 API_ENDPOINT = "https://api.spotify.com/v1/me/player"
 

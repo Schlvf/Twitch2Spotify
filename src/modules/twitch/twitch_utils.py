@@ -4,9 +4,12 @@ import urllib.parse
 
 from fastapi import Request
 
-from api import OauthToken, give_status_response
-from core import EnvWrapper, make_request
-from modules.redis import RedisHandler, UserCache
+from api import OauthToken
+from api import give_status_response
+from core import EnvWrapper
+from core import make_request
+from modules.redis import RedisHandler
+from modules.redis import UserCache
 
 from .eventsub_models import Event
 

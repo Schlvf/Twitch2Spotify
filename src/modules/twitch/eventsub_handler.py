@@ -6,12 +6,10 @@ from modules.redis.cache_models import UserCache
 from modules.redis.redis_handler import RedisHandler
 
 from .eventsub_models import TwitchUsersQuery
-from .twitch_utils import (
-    get_channel_id,
-    get_headers,
-    get_subscription_body,
-    get_user_access_token,
-)
+from .twitch_utils import get_channel_id
+from .twitch_utils import get_headers
+from .twitch_utils import get_subscription_body
+from .twitch_utils import get_user_access_token
 
 URL = "https://api.twitch.tv/helix/eventsub/subscriptions"
 

@@ -1,9 +1,11 @@
 from fastapi import APIRouter
 
-from api import ResponseMessage, url_encode_params
+from api import ResponseMessage
+from api import url_encode_params
 
 from .spotify_handler import add_song_to_queue
-from .spotify_utils import get_new_access_token, get_user_auth_params
+from .spotify_utils import get_new_access_token
+from .spotify_utils import get_user_auth_params
 
 router = APIRouter(prefix="/spotify")
 

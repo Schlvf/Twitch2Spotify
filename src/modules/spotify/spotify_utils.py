@@ -4,8 +4,10 @@ import time
 
 from fastapi import HTTPException
 
-from core import EnvWrapper, make_request
-from modules.redis import RedisHandler, UserCache
+from core import EnvWrapper
+from core import make_request
+from modules.redis import RedisHandler
+from modules.redis import UserCache
 
 REDIRECT_URI = f"{EnvWrapper().GRIMM_SUBDOMAIN}/spotify/user_authorize"
 

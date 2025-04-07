@@ -1,15 +1,17 @@
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter
+from fastapi import Request
+from fastapi import Response
 from fastapi.responses import PlainTextResponse
 
 from .event_handler import solve_event
-from .eventsub_handler import create_user_cache, subscribe_to_event, unsubscribe_to_all
+from .eventsub_handler import create_user_cache
+from .eventsub_handler import subscribe_to_event
+from .eventsub_handler import unsubscribe_to_all
 from .eventsub_models import Event
-from .twitch_utils import (
-    authenticate_hmac,
-    check_dup_events,
-    get_user_auth_params,
-    url_encode_params,
-)
+from .twitch_utils import authenticate_hmac
+from .twitch_utils import check_dup_events
+from .twitch_utils import get_user_auth_params
+from .twitch_utils import url_encode_params
 
 router = APIRouter(prefix="/eventsub")
 
