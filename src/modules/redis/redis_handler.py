@@ -84,6 +84,6 @@ class RedisHandler:
         return len(res)
 
     @time_diff
-    def exists(self, keys: list) -> int:
-        res = self.redis_client.exists(keys)
+    def exists(self, key: str) -> int:
+        res = self.redis_client.exists(key)
         return res
