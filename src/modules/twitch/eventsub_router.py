@@ -60,8 +60,7 @@ async def user_authorization():
 
 
 @router.get("/twitch_auth")
-async def twitch_auth(request: Request):
-    print(await request.body())
+async def twitch_auth():
     return {
         "Status": "Authorization successful",
         "Message": "This should be a one time process, now you can close this window",
