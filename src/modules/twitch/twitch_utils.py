@@ -80,7 +80,7 @@ def get_user_auth_params():
         "client_id": EnvWrapper().TWITCH_APP_ID,
         "redirect_uri": f"{EnvWrapper().GRIMM_SUBDOMAIN}/eventsub/twitch_auth",
         "response_type": "code",
-        "scope": "channel:read:redemptions",
+        "scope": "channel:manage:redemptions",
     }
 
 
