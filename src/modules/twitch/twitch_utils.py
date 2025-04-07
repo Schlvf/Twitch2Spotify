@@ -4,8 +4,8 @@ import urllib.parse
 
 from fastapi import Request
 
-from api import OauthToken
 from api import give_status_response
+from api import OauthToken
 from core import EnvWrapper
 from core import make_request
 from modules.redis import RedisHandler
