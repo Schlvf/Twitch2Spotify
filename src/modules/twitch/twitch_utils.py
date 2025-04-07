@@ -4,7 +4,7 @@ import urllib.parse
 
 from fastapi import Request
 
-from api import OauthToken
+from api import OauthToken, give_status_response
 from core import EnvWrapper, make_request
 from modules.redis import RedisHandler, UserCache
 
@@ -121,29 +121,11 @@ def url_encode_params(params: dict):
 
 def get_channel_id(channel_name: str):
     user_cache = RedisHandler().get_dict(name=channel_name, class_type=UserCache)
-    if user_cache:
-        return user_cache.twitch_channel_id
-
-    params = {"login": channel_name}
-    url = f"https://api.twitch.tv/helix/users{url_encode_params(params=params)}"
-    headers = {
-        "Authorization": f"Bearer {get_access_token()}",
-        "Client-Id": EnvWrapper().TWITCH_APP_ID,
-    }
-    response = make_request(method="GET", url=url, headers=headers)
-    user_data = response.json()
-    if not user_data.get("data"):
-        return
-    print("Client id obtained")
-
-    user_cache = UserCache(
-        twitch_channel_name=channel_name,
-        twitch_channel_id=user_data.get("data")[0].get("id"),
-    )
-    RedisHandler().set_dict(
-        name=channel_name,
-        payload=user_cache.model_dump(exclude_none=True),
-    )
+    if not user_cache:
+        give_status_response(
+            status_code=400,
+            custom_message="Please re-authorize twitch before performing this action",
+        )
     return user_cache.twitch_channel_id
 
 

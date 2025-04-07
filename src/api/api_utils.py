@@ -2,6 +2,14 @@ import urllib.parse
 
 from fastapi import HTTPException
 
+CUSTOM_RESPONSES = {
+    201: "Created",
+    400: "Bad request",
+    401: "Unauthorized",
+    403: "Forbidden",
+    404: "Not found",
+}
+
 
 def url_encode_params(params: dict):
     return "?" + urllib.parse.urlencode(params)
@@ -33,18 +41,24 @@ class ResponseMessage:
         }
 
 
-class StatusResponse:
-    def created():
-        raise HTTPException(status_code=201, detail="Created")
+def give_status_response(
+    status_code: int,
+    custom_message: str | None = None,
+) -> HTTPException:
+    """
+    This method allows you to provide a rest response at any given time.
 
-    def bad_request():
-        raise HTTPException(status_code=400, detail="Bad request")
+    :param status_code: Int of the status code you want to return
+    :param custom_message: (optional) String of the custom message you want to return
+    """
 
-    def unauthorized():
-        raise HTTPException(status_code=401, detail="Unauthorized")
+    if not custom_message:
+        if status_code in CUSTOM_RESPONSES:
+            raise HTTPException(
+                status_code=status_code,
+                detail=CUSTOM_RESPONSES.get(status_code),
+            )
 
-    def forbidden():
-        raise HTTPException(status_code=403, detail="Forbidden")
+        raise HTTPException(status_code=status_code)
 
-    def not_found():
-        raise HTTPException(status_code=404, detail="Not found")
+    raise HTTPException(status_code=status_code, detail=custom_message)
