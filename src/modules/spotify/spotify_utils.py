@@ -4,7 +4,7 @@ import time
 
 from fastapi import HTTPException
 
-from core import EnvWrapper, RestHandler
+from core import EnvWrapper, make_request
 from modules.redis import RedisHandler, UserCache
 
 REDIRECT_URI = f"{EnvWrapper().GRIMM_SUBDOMAIN}/spotify/user_authorize"
@@ -19,7 +19,7 @@ def get_user_auth_params():
     }
 
 
-def make_request(
+def make_spotify_request(
     method: str,
     url: str,
     headers: dict = None,
@@ -41,7 +41,7 @@ def make_request(
             print("Spotify token expired, refreshing...")
             user_cache = refresh_access_token(user_cache=user_cache)
         headers = get_headers(user_cache=user_cache)
-    res = RestHandler.make_request(
+    res = make_request(
         method=method,
         url=url,
         headers=headers,

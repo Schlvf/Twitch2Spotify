@@ -5,7 +5,7 @@ import urllib.parse
 from fastapi import Request
 
 from api import OauthToken
-from core import EnvWrapper, RestHandler
+from core import EnvWrapper, make_request
 from modules.redis import RedisHandler, UserCache
 
 from .eventsub_models import Event
@@ -55,22 +55,26 @@ def get_oauth_params():
 
 
 def get_access_token():
-    token = RedisHandler().get_dict(name="twitch_oauth", class_type=OauthToken)
+    token = RedisHandler().get_pair(name="twitch_oauth")
     if token:
         return token.access_token
+
     url = "https://id.twitch.tv/oauth2/token"
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     body = get_oauth_params()
 
-    response = RestHandler.make_request(
+    token = make_request(
         method="POST",
         url=url,
         headers=headers,
         body=body,
+        class_type=OauthToken,
     )
-    token = OauthToken(**response.json())
-    RedisHandler().set_dict(name="twitch_oauth", payload=token.model_dump())
-    RedisHandler().set_expire(name="twitch_oauth", seconds=token.expires_in)
+    RedisHandler().set_pair(
+        name="twitch_oauth",
+        value=token.access_token,
+        expiration=token.expires_in,
+    )
     print("New access token generated")
     return token.access_token
 
@@ -99,7 +103,7 @@ def get_channel_id(channel_name: str):
         "Authorization": f"Bearer {get_access_token()}",
         "Client-Id": EnvWrapper().TWITCH_APP_ID,
     }
-    response = RestHandler.make_request(method="GET", url=url, headers=headers)
+    response = make_request(method="GET", url=url, headers=headers)
     user_data = response.json()
     if not user_data.get("data"):
         return
@@ -140,113 +144,9 @@ def get_headers():
 
 def get_events(event_name=None):
     events = {
-        "channel.update": {"type": "broadcaster_user_id", "scopes": ["public"]},
-        "channel.follow": {"type": "broadcaster_user_id", "scopes": ["public"]},
-        "channel.subscribe": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:read:subscriptions"],
-        },
-        "channel.subscription.end": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:read:subscriptions"],
-        },
-        "channel.subscription.gift": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:read:subscriptions"],
-        },
-        "channel.subscription.message": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:read:subscriptions"],
-        },
-        "channel.cheer": {"type": "broadcaster_user_id", "scopes": ["bits:read"]},
-        "channel.raid": {"type": "to_broadcaster_user_id", "scopes": ["public"]},
-        "channel.ban": {"type": "broadcaster_user_id", "scopes": ["channel:moderate"]},
-        "channel.unban": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:moderate"],
-        },
-        "channel.moderator.add": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:moderate"],
-        },
-        "channel.moderator.remove": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:moderate"],
-        },
-        "channel.channel_points_custom_reward.add": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:read:redemptions"],
-        },
-        "channel.channel_points_custom_reward.update": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:read:redemptions"],
-        },
-        "channel.channel_points_custom_reward.remove": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:read:redemptions"],
-        },
         "channel.channel_points_custom_reward_redemption.add": {
             "type": "broadcaster_user_id",
             "scopes": ["channel:read:redemptions"],
         },
-        "channel.channel_points_custom_reward_redemption.update": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:read:redemptions"],
-        },
-        "channel.poll.begin": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:read:polls"],
-        },
-        "channel.poll.progress": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:read:polls"],
-        },
-        "channel.poll.end": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:read:polls"],
-        },
-        "channel.prediction.begin": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:read:predictions"],
-        },
-        "channel.prediction.progress": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:read:predictions"],
-        },
-        "channel.prediction.lock": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:read:predictions"],
-        },
-        "channel.prediction.end": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:read:predictions"],
-        },
-        "channel.goal.begin": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:read:goals"],
-        },
-        "channel.goal.progress": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:read:goals"],
-        },
-        "channel.goal.end": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:read:goals"],
-        },
-        "channel.hype_train.begin": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:read:hype_train"],
-        },
-        "channel.hype_train.progress": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:read:hype_train"],
-        },
-        "channel.hype_train.end": {
-            "type": "broadcaster_user_id",
-            "scopes": ["channel:read:hype_train"],
-        },
-        "stream.online": {"type": "broadcaster_user_id", "scopes": ["public"]},
-        "stream.offline": {"type": "broadcaster_user_id", "scopes": ["public"]},
-        "user.update": {"type": "user_id", "scopes": ["public"]},
     }
     return events.get(event_name, events)

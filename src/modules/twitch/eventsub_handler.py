@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 
-from core import RestHandler
+from core import make_request
 
 from .twitch_utils import get_channel_id, get_headers, get_subscription_body
 
@@ -17,7 +17,7 @@ def subscribe_to_event(event_name: str, channel_name: str):
         )
 
     body = get_subscription_body(user_id=user_id, event_name=event_name)
-    response = RestHandler.make_request(
+    response = make_request(
         method="POST",
         url=URL,
         headers=get_headers(),
@@ -37,7 +37,7 @@ def subscribe_to_event(event_name: str, channel_name: str):
 
 
 def unsubscribe_to_all():
-    response = RestHandler.make_request(
+    response = make_request(
         method="GET",
         url=URL,
         headers=get_headers(),
@@ -56,7 +56,7 @@ def unsubscribe_to_all():
 
 
 def unsubscribe_to_event(event_id: str):
-    response = RestHandler.make_request(
+    response = make_request(
         method="DELETE",
         url=URL,
         headers=get_headers(),
