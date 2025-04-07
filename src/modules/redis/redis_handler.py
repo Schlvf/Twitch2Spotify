@@ -82,3 +82,8 @@ class RedisHandler:
         for key in res:
             self.redis_client.delete(key)
         return len(res)
+
+    @time_diff
+    def exists(self, keys: list) -> int:
+        res = self.redis_client.exists(keys)
+        return res
