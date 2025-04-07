@@ -1,8 +1,17 @@
 from fastapi import HTTPException
 
 from core import make_request
+from core.wrappers import EnvWrapper
+from modules.redis.cache_models import UserCache
+from modules.redis.redis_handler import RedisHandler
 
-from .twitch_utils import get_channel_id, get_headers, get_subscription_body
+from .eventsub_models import TwitchUsersQuery
+from .twitch_utils import (
+    get_channel_id,
+    get_headers,
+    get_subscription_body,
+    get_user_access_token,
+)
 
 URL = "https://api.twitch.tv/helix/eventsub/subscriptions"
 
@@ -64,3 +73,36 @@ def unsubscribe_to_event(event_id: str):
     )
     if response.status_code in [200, 204]:
         return True
+
+
+def create_user_cache(auth_code: str):
+    user_access_token = get_user_access_token(code=auth_code)
+
+    def check_if_user_cache_exists(channel_name):
+        return RedisHandler().exists(key=channel_name)
+
+    url = "https://api.twitch.tv/helix/users"
+    headers = {
+        "Authorization": f"Bearer {user_access_token}",
+        "Client-Id": EnvWrapper().TWITCH_APP_ID,
+    }
+    response = make_request(
+        method="GET",
+        url=url,
+        headers=headers,
+        class_type=TwitchUsersQuery,
+    )
+    if response.data:
+        user_data = response.data[0]
+
+    user_cache = UserCache(
+        twitch_channel_name=user_data.login,
+        twitch_channel_id=user_data.id,
+    )
+
+    if not check_if_user_cache_exists(channel_name=user_cache.twitch_channel_name):
+        RedisHandler().set_dict(
+            name=user_cache.twitch_channel_name,
+            payload=user_cache.model_dump(exclude_none=True),
+        )
+        print("User cache created")

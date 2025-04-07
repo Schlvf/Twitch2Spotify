@@ -14,6 +14,7 @@ TWITCH_MESSAGE_ID = "twitch-eventsub-message-id"
 TWITCH_MESSAGE_TIMESTAMP = "twitch-eventsub-message-timestamp"
 TWITCH_MESSAGE_SIGNATURE = "twitch-eventsub-message-signature"
 HMAC_PREFIX = "sha256="
+REDIRECT_URI = f"{EnvWrapper().GRIMM_SUBDOMAIN}/eventsub/twitch_auth"
 
 
 def get_hmac_message(request: Request, rawbody: str):
@@ -46,7 +47,17 @@ def check_dup_events(event: Event):
         RedisHandler().set_pair(name=event.event.id, value=1, expiration=300)
 
 
-def get_oauth_params():
+def get_user_token_params(code=str):
+    return {
+        "client_id": EnvWrapper().TWITCH_APP_ID,
+        "client_secret": EnvWrapper().TWITCH_APP_SECRET,
+        "code": code,
+        "grant_type": "authorization_code",
+        "redirect_uri": REDIRECT_URI,
+    }
+
+
+def get_app_token_params():
     return {
         "client_id": EnvWrapper().TWITCH_APP_ID,
         "client_secret": EnvWrapper().TWITCH_APP_SECRET,
@@ -61,7 +72,7 @@ def get_access_token():
 
     url = "https://id.twitch.tv/oauth2/token"
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
-    body = get_oauth_params()
+    body = get_app_token_params()
 
     token = make_request(
         method="POST",
@@ -75,14 +86,30 @@ def get_access_token():
         value=token.access_token,
         expiration=token.expires_in,
     )
-    print("New access token generated")
+    print("New app access token generated")
+    return token.access_token
+
+
+def get_user_access_token(code: str):
+    url = "https://id.twitch.tv/oauth2/token"
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    body = get_user_token_params(code=code)
+
+    token = make_request(
+        method="POST",
+        url=url,
+        headers=headers,
+        body=body,
+        class_type=OauthToken,
+    )
+    print("New user access token generated")
     return token.access_token
 
 
 def get_user_auth_params():
     return {
         "client_id": EnvWrapper().TWITCH_APP_ID,
-        "redirect_uri": f"{EnvWrapper().GRIMM_SUBDOMAIN}/eventsub/twitch_auth",
+        "redirect_uri": REDIRECT_URI,
         "response_type": "code",
         "scope": "channel:manage:redemptions",
     }
@@ -93,9 +120,9 @@ def url_encode_params(params: dict):
 
 
 def get_channel_id(channel_name: str):
-    user_cache = RedisHandler().get_dict(channel_name)
+    user_cache = RedisHandler().get_dict(name=channel_name, class_type=UserCache)
     if user_cache:
-        return UserCache(**user_cache).twitch_channel_id
+        return user_cache.twitch_channel_id
 
     params = {"login": channel_name}
     url = f"https://api.twitch.tv/helix/users{url_encode_params(params=params)}"

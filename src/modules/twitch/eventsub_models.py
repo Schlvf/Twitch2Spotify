@@ -31,3 +31,13 @@ class Event(BaseModel):
     challenge: str | None = None
     subscription: SubscriptionField | None = None
     event: EventInfo | None = None
+
+
+class TwitchUser(BaseModel):
+    id: str
+    login: str
+    display_name: str
+
+
+class TwitchUsersQuery(BaseModel):
+    data: list[TwitchUser | None]

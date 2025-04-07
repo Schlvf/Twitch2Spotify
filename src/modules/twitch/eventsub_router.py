@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request, Response
 from fastapi.responses import PlainTextResponse
 
 from .event_handler import solve_event
-from .eventsub_handler import subscribe_to_event, unsubscribe_to_all
+from .eventsub_handler import create_user_cache, subscribe_to_event, unsubscribe_to_all
 from .eventsub_models import Event
 from .twitch_utils import (
     authenticate_hmac,
@@ -60,7 +60,9 @@ async def user_authorization():
 
 
 @router.get("/twitch_auth")
-async def twitch_auth():
+async def twitch_auth(code: str | None):
+    if code:
+        create_user_cache(auth_code=code)
     return {
         "Status": "Authorization successful",
         "Message": "This should be a one time process, now you can close this window",
