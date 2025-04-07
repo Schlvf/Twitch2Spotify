@@ -57,7 +57,7 @@ def get_oauth_params():
 def get_access_token():
     token = RedisHandler().get_pair(name="twitch_oauth")
     if token:
-        return token.access_token
+        return token
 
     url = "https://id.twitch.tv/oauth2/token"
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
