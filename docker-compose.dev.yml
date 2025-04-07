@@ -1,0 +1,46 @@
+services:
+  grimm-redis:
+    image: redis:7.4.2-bookworm
+    container_name: grimm-redis
+    command: redis-server --save 300 1 --loglevel warning --port 6379
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    expose:
+      - 6379
+    volumes:
+      - cache:/data
+  grimm-api:
+    profiles:
+      - zrok
+    env_file:
+      - .env
+    depends_on:
+      - grimm-redis
+    build: .
+    expose:
+      - ${PORT}
+    ports:
+      - "${PORT}:${PORT}"
+    restart: always
+
+  zrok-share:
+    profiles:
+      - zrok
+    env_file:
+      - .env
+    depends_on:
+      - grimm-api
+    image: openziti/zrok:latest
+    restart: unless-stopped
+    entrypoint: zrok-share.bash
+    environment:
+      HOME: /mnt  # zrok homedir in container
+      PFXLOG_NO_JSON: "true"  # suppress JSON logging format
+      ZROK_TARGET: "http://grimm-api:${PORT}"
+    volumes:
+      - zrok_env:/mnt
+volumes:
+  zrok_env:
+  cache:
+    driver: local
