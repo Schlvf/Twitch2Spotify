@@ -41,7 +41,7 @@ class ResponseMessage:
         }
 
 
-def give_status_response(
+def return_status_response(
     status_code: int,
     custom_message: str | None = None,
 ) -> HTTPException:

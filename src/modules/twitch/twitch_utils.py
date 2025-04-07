@@ -4,8 +4,8 @@ import urllib.parse
 
 from fastapi import Request
 
-from api import give_status_response
 from api import OauthToken
+from api import return_status_response
 from core import EnvWrapper
 from core import make_request
 from modules.redis import RedisHandler
@@ -125,7 +125,7 @@ def url_encode_params(params: dict):
 def get_channel_id(channel_name: str):
     user_cache = RedisHandler().get_dict(name=channel_name, class_type=UserCache)
     if not user_cache:
-        give_status_response(
+        return_status_response(
             status_code=400,
             custom_message="Please re-authorize twitch before performing this action",
         )
