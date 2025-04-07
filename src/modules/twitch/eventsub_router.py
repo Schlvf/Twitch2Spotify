@@ -1,12 +1,17 @@
 from fastapi import APIRouter
+from fastapi import Depends
 from fastapi import Request
 from fastapi import Response
 from fastapi.responses import PlainTextResponse
 
+from api import ResponseMessage
+from api import sudo_auth
+
 from .event_handler import solve_event
 from .eventsub_handler import create_user_cache
 from .eventsub_handler import subscribe_to_event
-from .eventsub_handler import unsubscribe_to_all
+from .eventsub_handler import unsubscribe_from_all
+from .eventsub_handler import unsubscribe_user
 from .eventsub_models import Event
 from .twitch_utils import authenticate_hmac
 from .twitch_utils import check_dup_events
@@ -62,27 +67,29 @@ async def user_authorization():
 
 
 @router.get("/twitch_auth")
-async def twitch_auth(code: str | None):
-    if code:
-        create_user_cache(auth_code=code)
-    return {
-        "Status": "Authorization successful",
-        "Message": "This should be a one time process, now you can close this window",
-    }
+async def twitch_auth(code: str | None = None):
+    if not code:
+        return ResponseMessage.get_unsuccessful_auth_message()
+
+    user_name = create_user_cache(auth_code=code)
+
+    print(f"The user subscribed was {user_name}")
+    return ResponseMessage.get_successful_auth_message()
 
 
-@router.post("/subscribe")
-async def twitch_sub_event(event_name: str, channel_name: str):
-    subscribe_to_event(
-        event_name=event_name,
-        channel_name=channel_name,
-    )
-    return {"Status": f"{event_name} Subscribed successfully"}
+@router.get("/enable_integration/{channel_name}")
+async def enable_spotify_integration(channel_name: str):
+    subscribe_to_event(channel_name=channel_name)
+    return {"Status": "Integration successfully enabled"}
 
 
-@router.delete("/subscribe")
-async def twitch_unsub_event(response: Response):
-    if not unsubscribe_to_all():
-        response.status_code = 400
-        return
-    return {"Status": "Unsubscribed successfully"}
+@router.get("/disable_integration/{channel_name}")
+async def disable_spotify_integration(channel_name: str):
+    unsubscribe_user(channel_name=channel_name)
+    return {"Status": "Integration successfully disabled"}
+
+
+@router.delete("/unsubscribe_from_all", dependencies=[Depends(sudo_auth)])
+async def unsubscribe_from_all_events():
+    unsubscribe_from_all()
+    return {"Status": "Removed all subscriptions"}

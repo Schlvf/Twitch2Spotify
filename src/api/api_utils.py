@@ -25,7 +25,7 @@ class ResponseMessage:
     def get_unsuccessful_auth_message():
         return {
             "Status": "Authorization denied",
-            "Message": "You can authorize the app later on, now you can close this window",
+            "Message": "Something went wrong, try again later",
         }
 
     def send_code_message(code: str):

@@ -133,7 +133,7 @@ def get_channel_id(channel_name: str):
 
 
 def get_subscription_body(user_id: str, event_name: str):
-    event_info = get_events(event_name)
+    event_info = get_events_info(event_name)
     return {
         "type": f"{event_name}",
         "version": "1",
@@ -154,11 +154,11 @@ def get_headers():
     }
 
 
-def get_events(event_name=None):
+def get_events_info(event_name: str):
     events = {
         "channel.channel_points_custom_reward_redemption.add": {
             "type": "broadcaster_user_id",
             "scopes": ["channel:read:redemptions"],
         },
     }
-    return events.get(event_name, events)
+    return events.get(event_name)

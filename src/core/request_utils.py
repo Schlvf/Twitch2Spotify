@@ -29,6 +29,8 @@ def make_request(
 
     result = request(**request_data)
 
+    print("> status code: ", result.status_code)
+
     if not class_type:
         return result
 

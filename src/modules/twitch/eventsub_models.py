@@ -41,3 +41,14 @@ class TwitchUser(BaseModel):
 
 class TwitchUsersQuery(BaseModel):
     data: list[TwitchUser | None]
+
+
+class EventSubSubscription(BaseModel):
+    id: str
+    type: str
+    status: str
+
+
+class EventSubSubscriptionsQuery(BaseModel):
+    total: int
+    data: list[EventSubSubscription | None]

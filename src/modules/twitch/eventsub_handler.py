@@ -1,10 +1,13 @@
 from fastapi import HTTPException
 
+from api import return_status_response
 from core import make_request
 from core.wrappers import EnvWrapper
 from modules.redis.cache_models import UserCache
 from modules.redis.redis_handler import RedisHandler
 
+from .eventsub_models import EventSubSubscription
+from .eventsub_models import EventSubSubscriptionsQuery
 from .eventsub_models import TwitchUsersQuery
 from .twitch_utils import get_channel_id
 from .twitch_utils import get_headers
@@ -12,16 +15,11 @@ from .twitch_utils import get_subscription_body
 from .twitch_utils import get_user_access_token
 
 URL = "https://api.twitch.tv/helix/eventsub/subscriptions"
+DEFAULT_EVENT = "channel.channel_points_custom_reward_redemption.add"
 
 
-def subscribe_to_event(event_name: str, channel_name: str):
+def subscribe_to_event(channel_name: str, event_name: str = DEFAULT_EVENT):
     user_id = get_channel_id(channel_name=channel_name)
-
-    if not user_id:
-        raise HTTPException(
-            status_code=403,
-            detail="Make sure the username is correct and try again",
-        )
 
     body = get_subscription_body(user_id=user_id, event_name=event_name)
     response = make_request(
@@ -31,11 +29,8 @@ def subscribe_to_event(event_name: str, channel_name: str):
         json=body,
     )
     if response.status_code in [200, 202, 409]:
-        print("Successfully subscribed to ", event_name)
+        print(f"Successfully subscribed {channel_name} to ", event_name)
         return
-
-    print(response.json())
-    print(response.status_code)
 
     raise HTTPException(
         status_code=400,
@@ -43,37 +38,55 @@ def subscribe_to_event(event_name: str, channel_name: str):
     )
 
 
-def unsubscribe_to_all():
-    response = make_request(
+def unsubscribe_user(channel_name: str):
+    user_id = get_channel_id(channel_name=channel_name)
+
+    user_subscriptions = make_request(
         method="GET",
         url=URL,
         headers=get_headers(),
+        params={"user_id": user_id},
+        class_type=EventSubSubscriptionsQuery,
     )
-    print(response)
-    subscriptions = response.json()
-    for event in subscriptions.get("data"):
-        if not unsubscribe_to_event(event_id=event.get("id")):
-            return
-    print(
-        "Successfully unsubscribed from ",
-        subscriptions.get("total"),
-        " subscriptions",
-    )
-    return True
+
+    for event in user_subscriptions.data:
+        unsubscribe_from_event(event=event)
 
 
-def unsubscribe_to_event(event_id: str):
+def unsubscribe_from_all():
+    total_subscriptions = make_request(
+        method="GET",
+        url=URL,
+        headers=get_headers(),
+        class_type=EventSubSubscriptionsQuery,
+    )
+    for event in total_subscriptions.data:
+        unsubscribe_from_event(event=event)
+
+
+def unsubscribe_from_event(event: EventSubSubscription):
     response = make_request(
         method="DELETE",
         url=URL,
         headers=get_headers(),
-        params={"id": event_id},
+        params={"id": event.id},
     )
     if response.status_code in [200, 204]:
-        return True
+        print(f"Successfully unsubscribed from {event.type} with id {event.id}")
+        return
+
+    return_status_response(
+        status_code=400,
+        custom_message="Something went wrong when attemping to unsub from event",
+    )
 
 
 def create_user_cache(auth_code: str):
+    """
+    This method uses the code sent by twitch when the user completes the authorization process and creates the cache needed and finally returns the channel name.
+
+    :param auth_code: String of the code sent by twitch during authorization
+    """
     user_access_token = get_user_access_token(code=auth_code)
 
     def check_if_user_cache_exists(channel_name):
@@ -104,3 +117,5 @@ def create_user_cache(auth_code: str):
             payload=user_cache.model_dump(exclude_none=True),
         )
         print("User cache created")
+
+    return user_cache.twitch_channel_name
