@@ -1,3 +1,5 @@
+import time
+
 from fastapi import HTTPException
 
 from api import return_status_response
@@ -8,11 +10,14 @@ from modules.redis.redis_handler import RedisHandler
 
 from .eventsub_models import EventSubSubscription
 from .eventsub_models import EventSubSubscriptionsQuery
+from .eventsub_models import TwitchUser
 from .eventsub_models import TwitchUsersQuery
 from .twitch_utils import get_channel_id
 from .twitch_utils import get_headers
 from .twitch_utils import get_subscription_body
 from .twitch_utils import get_user_access_token
+from .twitch_utils import parse_token_data_into_cache
+from .twitch_utils import parse_user_data_into_cache
 
 URL = "https://api.twitch.tv/helix/eventsub/subscriptions"
 DEFAULT_EVENT = "channel.channel_points_custom_reward_redemption.add"
@@ -81,41 +86,57 @@ def unsubscribe_from_event(event: EventSubSubscription):
     )
 
 
-def create_user_cache(auth_code: str):
+def authorize_twitch_user(auth_code: str):
     """
     This method uses the code sent by twitch when the user completes the authorization process and creates the cache needed and finally returns the channel name.
 
     :param auth_code: String of the code sent by twitch during authorization
     """
+
+    current_ts = time.time()
     user_access_token = get_user_access_token(code=auth_code)
+    user_data = get_user_data(user_access_token=user_access_token.access_token)
 
-    def check_if_user_cache_exists(channel_name):
-        return RedisHandler().exists(key=channel_name)
+    user_cache = RedisHandler().get_dict(name=user_data.login, class_type=UserCache)
 
+    if not user_cache:
+        user_cache = parse_user_data_into_cache(
+            new_user=user_data,
+            new_token=user_access_token,
+            current_ts=current_ts,
+        )
+        print("New user cache created")
+    else:
+        user_cache = parse_token_data_into_cache(
+            user_cache=user_cache,
+            new_token=user_access_token,
+            current_ts=current_ts,
+        )
+        print("User cache updated")
+
+    RedisHandler().set_dict(
+        name=user_cache.twitch_channel_name,
+        payload=user_cache.model_dump(exclude_none=True),
+    )
+    return user_cache.twitch_channel_name
+
+
+def get_user_data(user_access_token: str) -> TwitchUser:
     url = "https://api.twitch.tv/helix/users"
     headers = {
         "Authorization": f"Bearer {user_access_token}",
         "Client-Id": EnvWrapper().TWITCH_APP_ID,
     }
-    response = make_request(
+    users = make_request(
         method="GET",
         url=url,
         headers=headers,
         class_type=TwitchUsersQuery,
     )
-    if response.data:
-        user_data = response.data[0]
-
-    user_cache = UserCache(
-        twitch_channel_name=user_data.login,
-        twitch_channel_id=user_data.id,
-    )
-
-    if not check_if_user_cache_exists(channel_name=user_cache.twitch_channel_name):
-        RedisHandler().set_dict(
-            name=user_cache.twitch_channel_name,
-            payload=user_cache.model_dump(exclude_none=True),
+    if not users.data:
+        return_status_response(
+            status_code=400,
+            custom_message="There was an issue obtaining the user data",
         )
-        print("User cache created")
 
-    return user_cache.twitch_channel_name
+    return users.data[0]

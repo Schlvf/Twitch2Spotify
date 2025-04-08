@@ -12,6 +12,7 @@ from modules.redis import RedisHandler
 from modules.redis import UserCache
 
 from .eventsub_models import Event
+from .eventsub_models import TwitchUser
 
 TWITCH_MESSAGE_ID = "twitch-eventsub-message-id"
 TWITCH_MESSAGE_TIMESTAMP = "twitch-eventsub-message-timestamp"
@@ -93,7 +94,7 @@ def get_access_token():
     return token.access_token
 
 
-def get_user_access_token(code: str):
+def get_user_access_token(code: str) -> OauthToken:
     url = "https://id.twitch.tv/oauth2/token"
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     body = get_user_token_params(code=code)
@@ -106,7 +107,7 @@ def get_user_access_token(code: str):
         class_type=OauthToken,
     )
     print("New user access token generated")
-    return token.access_token
+    return token
 
 
 def get_user_auth_params():
@@ -162,3 +163,29 @@ def get_events_info(event_name: str):
         },
     }
     return events.get(event_name)
+
+
+def parse_user_data_into_cache(
+    new_user: TwitchUser,
+    new_token: OauthToken,
+    current_ts: float,
+) -> UserCache:
+    return UserCache(
+        twitch_channel_name=new_user.login,
+        twitch_channel_id=new_user.id,
+        twitch_user_token=new_token.access_token,
+        twitch_user_refresh_token=new_token.refresh_token,
+        twitch_user_token_expiration=current_ts + new_token.expires_in,
+    )
+
+
+def parse_token_data_into_cache(
+    user_cache: UserCache,
+    new_token: OauthToken,
+    current_ts: float,
+) -> UserCache:
+    user_cache.twitch_user_token = new_token.access_token
+    user_cache.twitch_user_refresh_token = new_token.refresh_token
+    user_cache.twitch_user_token_expiration = current_ts + new_token.expires_in
+
+    return user_cache

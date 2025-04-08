@@ -8,7 +8,7 @@ from api import ResponseMessage
 from api import sudo_auth
 
 from .event_handler import solve_event
-from .eventsub_handler import create_user_cache
+from .eventsub_handler import authorize_twitch_user
 from .eventsub_handler import subscribe_to_event
 from .eventsub_handler import unsubscribe_from_all
 from .eventsub_handler import unsubscribe_user
@@ -71,7 +71,7 @@ async def twitch_auth(code: str | None = None):
     if not code:
         return ResponseMessage.get_unsuccessful_auth_message()
 
-    user_name = create_user_cache(auth_code=code)
+    user_name = authorize_twitch_user(auth_code=code)
 
     print(f"The user subscribed was {user_name}")
     return ResponseMessage.get_successful_auth_message()
