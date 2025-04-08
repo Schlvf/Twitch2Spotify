@@ -2,14 +2,14 @@ import base64
 import re
 import time
 
-from fastapi import HTTPException
-
+from api import return_status_response
 from core import EnvWrapper
 from core import make_request
 from modules.redis import RedisHandler
 from modules.redis import UserCache
 
 REDIRECT_URI = f"{EnvWrapper().GRIMM_SUBDOMAIN}/spotify/user_authorize"
+TOKEN_URL = "https://accounts.spotify.com/api/token"
 
 
 def get_user_auth_params():
@@ -32,17 +32,20 @@ def make_spotify_request(
     if not headers:
         user_cache = RedisHandler().get_dict(name=user_name, class_type=UserCache)
         if not user_cache:
-            print("***Spotify request without user cache***")
-            return
-        if not user_cache.spotify_auth_token:
-            print(
-                "***Spotify request without authorization code***",
+            return_status_response(
+                status_code=400,
+                custom_message="Please re-authorize twitch before performing this action",
             )
-            return
+        if not user_cache.spotify_auth_token:
+            return_status_response(
+                status_code=400,
+                custom_message="Please re-authorize spotify and valide the code before performing this action",
+            )
         if token_is_expired(user_cache=user_cache):
             print("Spotify token expired, refreshing...")
             user_cache = refresh_access_token(user_cache=user_cache)
         headers = get_headers(user_cache=user_cache)
+
     res = make_request(
         method=method,
         url=url,
@@ -52,6 +55,7 @@ def make_spotify_request(
     )
     print(">>>", res.status_code)
     if res.status_code == 200:
+        print("SPOTI REQUEST CONTENT:", res.content)
         # checking for string due to spotify api issue
         try:
             return res.json()
@@ -70,14 +74,13 @@ def make_spotify_request(
 
 def refresh_access_token(user_cache: UserCache):
     current_ts = time.time()
-    url = "https://accounts.spotify.com/api/token"
     body = {
         "grant_type": "refresh_token",
         "refresh_token": user_cache.spotify_refresh_token,
     }
-    res = make_request(
+    res = make_spotify_request(
         method="POST",
-        url=url,
+        url=TOKEN_URL,
         headers=get_auth_headers(),
         body=body,
     )
@@ -92,31 +95,30 @@ def refresh_access_token(user_cache: UserCache):
 
 def get_new_access_token(code: str, user_name: str):
     current_ts = time.time()
-    url = "https://accounts.spotify.com/api/token"
     body = {
         "grant_type": "authorization_code",
         "code": code,
         "redirect_uri": REDIRECT_URI,
     }
 
-    res = make_request(
+    res = make_spotify_request(
         method="POST",
-        url=url,
+        url=TOKEN_URL,
         headers=get_auth_headers(),
         body=body,
     )
 
     if res.get("error"):
-        raise HTTPException(
+        return_status_response(
             status_code=400,
-            detail="There was a problem with the code - Please try again",
+            custom_message="There was a problem with the code - Please try with a new one",
         )
 
     user_cache = RedisHandler().get_dict(name=user_name, class_type=UserCache)
     if not user_cache:
-        raise HTTPException(
-            status_code=403,
-            detail="Forbidden - Please re-authorize Twitch first",
+        return_status_response(
+            status_code=400,
+            custom_message="Please re-authorize twitch before performing this action",
         )
 
     user_cache.spotify_auth_token = res.get("access_token")
