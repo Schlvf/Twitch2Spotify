@@ -17,6 +17,7 @@ services:
       - .env
     depends_on:
       - grimm-redis
+    container_name: grimm-api
     build: .
     expose:
       - ${PORT}
@@ -31,6 +32,7 @@ services:
       - .env
     depends_on:
       - grimm-api
+    container_name: zrok-tunnel
     image: openziti/zrok:latest
     restart: unless-stopped
     entrypoint: zrok-share.bash
