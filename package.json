@@ -1,0 +1,12 @@
+{
+  "devDependencies": {
+    "parcel": "^2.14.0"
+  },
+  "name": "parcel-vanilla-starter",
+  "private": true,
+  "scripts": {
+    "build": "parcel build static/template/*.html --dist-dir dist",
+    "start": "parcel"
+  },
+  "version": "0.0.0"
+}
