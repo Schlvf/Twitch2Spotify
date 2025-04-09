@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "build": "parcel build static/template/*.html --dist-dir dist",
-    "start": "parcel"
+    "start": "parcel static/template/*.html --dist-dir dist --port 5000"
   },
   "version": "0.0.0"
 }
