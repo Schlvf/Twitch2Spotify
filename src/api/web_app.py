@@ -20,7 +20,7 @@ app.include_router(redis_router)
 
 
 @app.get("/", response_class=HTMLResponse)
-async def front(request: Request):
+async def home_page(request: Request):
     twitch_auth_url = get_twitch_auth_url()
     return templates.TemplateResponse(
         request=request,

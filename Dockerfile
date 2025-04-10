@@ -6,6 +6,7 @@ COPY package*.json .
 RUN npm install
 
 COPY /static ./static
+COPY .parcelrc .
 RUN npm run build
 
 FROM python:3.13.2-slim-bookworm AS python-runtime
