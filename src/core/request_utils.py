@@ -31,10 +31,12 @@ def make_request(
 
     print("> status code: ", result.status_code)
 
-    if not class_type:
-        return result
-
-    return class_type(**result.json())
+    if class_type:
+        try:
+            return class_type(**result.json())
+        except Exception:
+            print(f"Unable to parse request into {class_type}")
+    return result
 
 
 def is_valid_method(method: str):

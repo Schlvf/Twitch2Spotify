@@ -3,12 +3,13 @@ import re
 import time
 
 from api import return_status_response
+from api.api_utils import url_encode_params
 from core import EnvWrapper
 from core import make_request
 from modules.redis import RedisHandler
 from modules.redis import UserCache
 
-REDIRECT_URI = f"{EnvWrapper().GRIMM_SUBDOMAIN}/spotify/user_authorize"
+REDIRECT_URI = f"{EnvWrapper().GRIMM_SUBDOMAIN}/spotify/auth"
 TOKEN_URL = "https://accounts.spotify.com/api/token"
 
 
@@ -163,3 +164,13 @@ def parse_link_to_uri(link: str):
 def token_is_expired(user_cache: UserCache):
     current_ts = time.time()
     return current_ts >= user_cache.spotify_expire_ts
+
+
+def get_spotify_auth_url() -> str:
+    url = "https://accounts.spotify.com/authorize"
+    params = get_user_auth_params()
+    return url + url_encode_params(params=params)
+
+
+def get_spotify_code_url(channel_name: str) -> str:
+    return f"{EnvWrapper().GRIMM_SUBDOMAIN}/spotify/validate_code/{channel_name}"

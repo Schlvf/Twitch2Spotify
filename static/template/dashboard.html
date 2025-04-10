@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="content">
+      <div class="content-block">
+        <h1>Welcome <span class="purple-text">{{ user_name }}</span></h1>
+        <h2>What will it be this time?</h2>
+      </div>
+      <p>
+        If its the very first time you use the integration, you must generate a
+        new <span class="green-text">Spotify</span> access code by clicking
+        <a href="{{ spotify_url }}" target="_blank">here</a>
+      </p>
+      <p class="grayed-out">
+        PS: As long as the database is not wiped you only need to authorize and
+        generate a code once
+      </p>
+      <div>
+        <label for="user-input">Already got a code?</label>
+        <input
+          type="text"
+          id="user-input"
+          placeholder="Paste it in here..."
+          autocomplete="off"
+        />
+        <button class="btn" onclick="handle_spotify_code()">
+          Validate the code
+        </button>
+      </div>
+      <div class="content-block">
+        <h2>Control panel</h2>
+        <a href="#" class="btn">Enable integration</a>
+        <a href="#" class="btn">Disable integration</a>
+      </div>
+    </div>
+  </body>
+</html>
+<script>
+  function handle_spotify_code() {
+    var inputValue = document.getElementById("user-input").value;
+    const base_url = "{{ code_url }}";
+    var params = { code: inputValue };
+    window.open(base_url + parse_url_params(params));
+  }
+
+  function parse_url_params(params) {
+    return "?" + new URLSearchParams(params).toString();
+  }
+</script>

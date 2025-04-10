@@ -1,27 +1,34 @@
 from fastapi import APIRouter
 from fastapi import Depends
+from fastapi import Request
+from fastapi.templating import Jinja2Templates
 
 from api import ResponseMessage
 from api import sudo_auth
-from api import url_encode_params
 
 from .spotify_handler import add_song_to_queue
 from .spotify_utils import get_new_access_token
-from .spotify_utils import get_user_auth_params
+from .spotify_utils import get_spotify_auth_url
 
 router = APIRouter(prefix="/spotify")
+templates = Jinja2Templates(directory="dist")
 
 
-@router.get("/user_authorize")
-async def user_authorization(code: str = None, error: str = None):
+@router.get("/auth")
+async def spotify_authorization(request: Request, code: str = None, error: str = None):
     if error:
         return ResponseMessage.send_code_error(error=error)
     if code:
-        return ResponseMessage.send_code_message(code=code)
+        return templates.TemplateResponse(
+            request=request,
+            name="spotify_code.html",
+            context={"spotify_code": code},
+        )
 
-    url = "https://accounts.spotify.com/authorize"
-    params = get_user_auth_params()
-    return {"redirect_url": url + url_encode_params(params=params)}
+
+@router.get("/user_authorize")
+async def user_authorization():
+    return {"redirect_url": get_spotify_auth_url()}
 
 
 @router.get("/validate_code/{channel_name}")

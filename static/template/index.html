@@ -1,19 +1,28 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Home</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/style.css" />
   </head>
   <body>
     <div class="content">
       <div class="content-block">
-        <h1>Grimm integration</h1>
-        <p>Let your <span class="purple-text">Twitch</span> chat add songs to your <span class="green-text">Spotify</span> queue!</p>
-        <p class="grayed-out">What could go wrong?</p>
+        <h2 class="red-text">DO NOT SHOW THIS ON STREAM</h2>
+        <p class="peach-text">> You've been warned <</p>
       </div>
-      <a href="{{ twitch_auth_url }}" class="btn twitch-login-btn">Log in with twitch</a>
+      <div class="content-block">
+        <h1>Grimm integration</h1>
+        <p>
+          Let your <span class="purple-text">Twitch</span> chat add songs to
+          your <span class="green-text">Spotify</span> queue!
+          <span class="grayed-out">What could go wrong?</span>
+        </p>
+      </div>
+      <a href="{{ twitch_auth_url }}" class="btn twitch-login-btn"
+        >Log in with twitch</a
+      >
     </div>
   </body>
 </html>

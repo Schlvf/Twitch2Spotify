@@ -3,9 +3,12 @@ from fastapi import Depends
 from fastapi import Request
 from fastapi import Response
 from fastapi.responses import PlainTextResponse
+from fastapi.templating import Jinja2Templates
 
 from api import ResponseMessage
 from api import sudo_auth
+from modules.spotify import get_spotify_auth_url
+from modules.spotify import get_spotify_code_url
 
 from .event_handler import solve_event
 from .eventsub_handler import authorize_twitch_user
@@ -18,6 +21,7 @@ from .twitch_utils import check_dup_events
 from .twitch_utils import get_twitch_auth_url
 
 router = APIRouter(prefix="/eventsub")
+templates = Jinja2Templates(directory="dist")
 
 
 @router.post("/callback", status_code=200, response_class=PlainTextResponse)
@@ -63,15 +67,25 @@ async def user_authorization():
     return {"redirect_url": get_twitch_auth_url()}
 
 
-@router.get("/twitch_auth")
-async def twitch_auth(code: str | None = None):
+@router.get("/auth")
+async def twitch_auth(request: Request, code: str | None = None):
     if not code:
         return ResponseMessage.get_unsuccessful_auth_message()
 
-    user_name = authorize_twitch_user(auth_code=code)
+    channel_name = authorize_twitch_user(auth_code=code)
+    spotify_url = get_spotify_auth_url()
+    code_url = get_spotify_code_url(channel_name=channel_name)
 
-    print(f"The user subscribed was {user_name}")
-    return ResponseMessage.get_successful_auth_message()
+    print(f"The user subscribed was {channel_name}")
+    return templates.TemplateResponse(
+        request=request,
+        name="dashboard.html",
+        context={
+            "user_name": channel_name,
+            "spotify_url": spotify_url,
+            "code_url": code_url,
+        },
+    )
 
 
 @router.get("/enable_integration/{channel_name}")

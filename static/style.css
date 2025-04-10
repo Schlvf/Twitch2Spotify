@@ -4,41 +4,56 @@ html {
   align-items: center;
   justify-content: center;
   height: 100%;
-
 }
 
-:root{
+:root {
   font-family: "Ubuntu Mono", monospace;
   font-size: 20px;
   color: white;
 
   /* Constants */
-  --rose: #F2D3E0;
-  --pink: #F4A6C4;
-  --mauve: #D9A3A0;
-  --red: #F28D76;
-  --peach: #F2B95B;
-  --yellow: #E1C6A7;
-  --green: #A6E3A1;
-  --teal: #68B0A0;
-  --sky: #82C0F2;
-  --lavender: #A4A9F4;
-  --blue: #7D87F2;
-  --lilac: #A9A6F4;
-  --purple-dark-twitch:#9046ff;
+  --flamingo: #f2cdcd;
+  --rose: #f5e0dc;
+  --pink: #f5c2e7;
+  --mauve: #cba6f7;
+  --red: #f38ba8;
+  --peach: #fab387;
+  --yellow: #f9e2af;
+  --green: #a6e3a1;
+  --teal: #94e2d5;
+  --sky: #89dceb;
+  --lavender: #b4befe;
+  --blue: #89b4fa;
+  --base: #1e1e2e;
+  --purple-dark-twitch: #9046ff;
   --purple-light-twitch: #a970ff;
+  --green-spotify: #1db954;
 }
 
 .content {
-  text-align: center;  /* Optional: to center the text inside the content div */
+  text-align: center; /* Optional: to center the text inside the content div */
+  padding: 100px;
 }
-.content-block{
+.content-block {
   padding: 20px;
+}
+
+.horizontal-block {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-items: center;
+}
+
+input {
+  padding: 12px 25px;
+  font-size: 14;
+  color: white;
 }
 
 .btn {
   border-radius: 20px;
-  border: 1px solid black;
+  border: 0px solid;
   display: inline-block;
   cursor: pointer;
   font-family: "Trebuchet MS", monospace;
@@ -47,6 +62,11 @@ html {
   padding: 16px 31px;
   text-decoration: none;
   margin: 10px;
+  background-color: var(--green);
+  color: black;
+}
+.btn:hover {
+  background-color: var(--teal);
 }
 
 .btn:active {
@@ -57,11 +77,21 @@ html {
 /* Twitch-specific style */
 .twitch-login-btn {
   background-color: var(--purple-dark-twitch);
-  color: #ffffff;
+  color: white;
 }
 
 .twitch-login-btn:hover {
   background-color: var(--purple-light-twitch);
+}
+/* Spotify-specific style */
+.spotify-login-btn {
+  background-color: var(--green-spotify);
+  color: black;
+}
+
+.spotify-login-btn:hover {
+  background-color: var(--green);
+  color: black;
 }
 
 /* Text colors */
@@ -77,5 +107,15 @@ html {
 
 .purple-text {
   color: var(--purple-light-twitch);
+  font-weight: bold;
+}
+
+.red-text {
+  color: var(--red);
+  font-weight: bold;
+}
+
+.peach-text {
+  color: var(--peach);
   font-weight: bold;
 }

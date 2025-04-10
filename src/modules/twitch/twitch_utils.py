@@ -1,11 +1,11 @@
 import hashlib
 import hmac
-import urllib.parse
 
 from fastapi import Request
 
 from api import OauthToken
 from api import return_status_response
+from api import url_encode_params
 from core import EnvWrapper
 from core import make_request
 from modules.redis import RedisHandler
@@ -18,7 +18,7 @@ TWITCH_MESSAGE_ID = "twitch-eventsub-message-id"
 TWITCH_MESSAGE_TIMESTAMP = "twitch-eventsub-message-timestamp"
 TWITCH_MESSAGE_SIGNATURE = "twitch-eventsub-message-signature"
 HMAC_PREFIX = "sha256="
-REDIRECT_URI = f"{EnvWrapper().GRIMM_SUBDOMAIN}/eventsub/twitch_auth"
+REDIRECT_URI = f"{EnvWrapper().GRIMM_SUBDOMAIN}/eventsub/auth"
 
 
 def get_hmac_message(request: Request, rawbody: str):
@@ -106,6 +106,12 @@ def get_user_access_token(code: str) -> OauthToken:
         body=body,
         class_type=OauthToken,
     )
+    if not isinstance(token, OauthToken):
+        return_status_response(
+            status_code=400,
+            custom_message="There was a problem authorizing twitch or your session has ended",
+        )
+
     print("New user access token generated")
     return token
 
@@ -117,10 +123,6 @@ def get_user_auth_params():
         "response_type": "code",
         "scope": "channel:manage:redemptions",
     }
-
-
-def url_encode_params(params: dict):
-    return f"?{urllib.parse.urlencode(params)}"
 
 
 def get_channel_id(channel_name: str):
