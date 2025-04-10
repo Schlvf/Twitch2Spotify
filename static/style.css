@@ -1,8 +1,81 @@
 html {
   color-scheme: light dark;
-  font-family: system-ui;
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
+
+}
+
+:root{
+  font-family: "Ubuntu Mono", monospace;
+  font-size: 20px;
+  color: white;
+
+  /* Constants */
+  --rose: #F2D3E0;
+  --pink: #F4A6C4;
+  --mauve: #D9A3A0;
+  --red: #F28D76;
+  --peach: #F2B95B;
+  --yellow: #E1C6A7;
+  --green: #A6E3A1;
+  --teal: #68B0A0;
+  --sky: #82C0F2;
+  --lavender: #A4A9F4;
+  --blue: #7D87F2;
+  --lilac: #A9A6F4;
+  --purple-dark-twitch:#9046ff;
+  --purple-light-twitch: #a970ff;
+}
+
+.content {
+  text-align: center;  /* Optional: to center the text inside the content div */
+}
+.content-block{
+  padding: 20px;
+}
+
+.btn {
+  border-radius: 20px;
+  border: 1px solid black;
+  display: inline-block;
+  cursor: pointer;
+  font-family: "Trebuchet MS", monospace;
+  font-size: 17px;
+  font-weight: bold;
+  padding: 16px 31px;
+  text-decoration: none;
+  margin: 10px;
+}
+
+.btn:active {
+  position: relative;
+  top: 2px;
+}
+
+/* Twitch-specific style */
+.twitch-login-btn {
+  background-color: var(--purple-dark-twitch);
+  color: #ffffff;
+}
+
+.twitch-login-btn:hover {
+  background-color: var(--purple-light-twitch);
+}
+
+/* Text colors */
+.grayed-out {
+  color: gray;
+  font-style: italic;
+  font-size: 16;
+}
+.green-text {
+  color: var(--green);
+  font-weight: bold;
+}
+
+.purple-text {
+  color: var(--purple-light-twitch);
+  font-weight: bold;
 }

@@ -15,8 +15,7 @@ from .eventsub_handler import unsubscribe_user
 from .eventsub_models import Event
 from .twitch_utils import authenticate_hmac
 from .twitch_utils import check_dup_events
-from .twitch_utils import get_user_auth_params
-from .twitch_utils import url_encode_params
+from .twitch_utils import get_twitch_auth_url
 
 router = APIRouter(prefix="/eventsub")
 
@@ -61,9 +60,7 @@ async def callback_endpoint(
 
 @router.get("/user_authorize")
 async def user_authorization():
-    url = "https://id.twitch.tv/oauth2/authorize"
-    params = get_user_auth_params()
-    return {"redirect_url": url + url_encode_params(params=params)}
+    return {"redirect_url": get_twitch_auth_url()}
 
 
 @router.get("/twitch_auth")

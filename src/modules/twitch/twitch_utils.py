@@ -189,3 +189,9 @@ def parse_token_data_into_cache(
     user_cache.twitch_user_token_expiration = current_ts + new_token.expires_in
 
     return user_cache
+
+
+def get_twitch_auth_url() -> str:
+    url = "https://id.twitch.tv/oauth2/authorize"
+    params = get_user_auth_params()
+    return url + url_encode_params(params=params)

@@ -7,7 +7,13 @@
     <link rel="stylesheet" href="/static/style.css">
   </head>
   <body>
-    <h1>{{ title }}</h1>
-    <p>{{ description }}</p>
+    <div class="content">
+      <div class="content-block">
+        <h1>Grimm integration</h1>
+        <p>Let your <span class="purple-text">Twitch</span> chat add songs to your <span class="green-text">Spotify</span> queue!</p>
+        <p class="grayed-out">What could go wrong?</p>
+      </div>
+      <a href="{{ twitch_auth_url }}" class="btn twitch-login-btn">Log in with twitch</a>
+    </div>
   </body>
 </html>

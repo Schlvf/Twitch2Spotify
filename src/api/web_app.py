@@ -8,6 +8,7 @@ from fastapi.templating import Jinja2Templates
 from modules.redis import redis_router
 from modules.spotify import spotify_router
 from modules.twitch import eventsub_router
+from modules.twitch import get_twitch_auth_url
 
 templates = Jinja2Templates(directory="dist")
 
@@ -20,12 +21,11 @@ app.include_router(redis_router)
 
 @app.get("/", response_class=HTMLResponse)
 async def front(request: Request):
-    title = "Hello World"
-    description = "This was a value passed from python"
+    twitch_auth_url = get_twitch_auth_url()
     return templates.TemplateResponse(
         request=request,
         name="index.html",
-        context={"title": title, "description": description},
+        context={"twitch_auth_url": twitch_auth_url},
     )
 
 
