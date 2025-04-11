@@ -18,6 +18,8 @@ from .eventsub_handler import unsubscribe_user
 from .eventsub_models import Event
 from .twitch_utils import authenticate_hmac
 from .twitch_utils import check_dup_events
+from .twitch_utils import get_disable_url
+from .twitch_utils import get_enable_url
 from .twitch_utils import get_twitch_auth_url
 
 router = APIRouter(prefix="/eventsub")
@@ -73,18 +75,19 @@ async def twitch_auth(request: Request, code: str | None = None):
         return ResponseMessage.get_unsuccessful_auth_message()
 
     channel_name = authorize_twitch_user(auth_code=code)
-    spotify_url = get_spotify_auth_url()
-    code_url = get_spotify_code_url(channel_name=channel_name)
+    context = {
+        "user_name": channel_name,
+        "spotify_url": get_spotify_auth_url(),
+        "code_url": get_spotify_code_url(channel_name=channel_name),
+        "enable_integration_url": get_enable_url(channel_name=channel_name),
+        "disable_integration_url": get_disable_url(channel_name=channel_name),
+    }
 
     print(f"The user subscribed was {channel_name}")
     return templates.TemplateResponse(
         request=request,
         name="dashboard.html",
-        context={
-            "user_name": channel_name,
-            "spotify_url": spotify_url,
-            "code_url": code_url,
-        },
+        context=context,
     )
 
 

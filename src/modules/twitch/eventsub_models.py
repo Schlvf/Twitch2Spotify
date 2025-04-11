@@ -52,3 +52,16 @@ class EventSubSubscription(BaseModel):
 class EventSubSubscriptionsQuery(BaseModel):
     total: int
     data: list[EventSubSubscription | None]
+
+
+class CustomReward(BaseModel):
+    id: str
+    is_enabled: bool
+    title: str
+    is_user_input_required: bool
+    cost: int
+    prompt: str
+
+
+class CustomRewardsQuery(BaseModel):
+    data: list[CustomReward | None]

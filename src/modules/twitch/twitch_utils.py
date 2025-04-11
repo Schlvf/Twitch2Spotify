@@ -125,22 +125,28 @@ def get_user_auth_params():
     }
 
 
-def get_channel_id(channel_name: str):
+def get_user_cache(channel_name: str) -> UserCache:
     user_cache = RedisHandler().get_dict(name=channel_name, class_type=UserCache)
     if not user_cache:
         return_status_response(
             status_code=400,
             custom_message="Please re-authorize twitch before performing this action",
         )
-    return user_cache.twitch_channel_id
+    return user_cache
 
 
-def get_subscription_body(user_id: str, event_name: str):
+def get_subscription_body(user_id: str, event_name: str, reward_id: str | None = None):
     event_info = get_events_info(event_name)
+    conditions = {
+        f"{event_info['type']}": f"{user_id}",
+    }
+    if reward_id:
+        conditions["reward_id"] = reward_id
+
     return {
         "type": f"{event_name}",
         "version": "1",
-        "condition": {f"{event_info['type']}": f"{user_id}"},
+        "condition": conditions,
         "transport": {
             "method": "webhook",
             "callback": f"{EnvWrapper().GRIMM_SUBDOMAIN}/eventsub/callback",
@@ -197,3 +203,11 @@ def get_twitch_auth_url() -> str:
     url = "https://id.twitch.tv/oauth2/authorize"
     params = get_user_auth_params()
     return url + url_encode_params(params=params)
+
+
+def get_enable_url(channel_name: str) -> str:
+    return f"{EnvWrapper().GRIMM_SUBDOMAIN}/eventsub/enable_integration/{channel_name}"
+
+
+def get_disable_url(channel_name: str) -> str:
+    return f"{EnvWrapper().GRIMM_SUBDOMAIN}/eventsub/disable_integration/{channel_name}"
