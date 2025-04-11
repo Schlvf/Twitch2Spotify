@@ -74,7 +74,7 @@ async def twitch_auth(request: Request, code: str | None = None):
         "disable_integration_url": get_disable_url(channel_name=channel_name),
     }
 
-    print(f"The user subscribed was {channel_name}")
+    print(f"The user authorized was {channel_name}")
     return templates.TemplateResponse(
         request=request,
         name="dashboard.html",
