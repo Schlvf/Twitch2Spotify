@@ -7,7 +7,6 @@ class UserCache(BaseModel):
 
     twitch_user_token: str
     twitch_user_refresh_token: str
-    twitch_user_token_expiration: float
 
     spotify_auth_token: str | None = None
     spotify_refresh_token: str | None = None

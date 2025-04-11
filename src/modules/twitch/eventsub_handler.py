@@ -1,5 +1,3 @@
-import time
-
 from fastapi import HTTPException
 
 from api import return_status_response
@@ -117,7 +115,6 @@ def authorize_twitch_user(auth_code: str):
     :param auth_code: String of the code sent by twitch during authorization
     """
 
-    current_ts = time.time()
     user_access_token = get_user_access_token(code=auth_code)
     user_data = get_user_data(user_access_token=user_access_token.access_token)
 
@@ -127,14 +124,12 @@ def authorize_twitch_user(auth_code: str):
         user_cache = parse_user_data_into_cache(
             new_user=user_data,
             new_token=user_access_token,
-            current_ts=current_ts,
         )
         print("New user cache created")
     else:
         user_cache = parse_token_data_into_cache(
             user_cache=user_cache,
             new_token=user_access_token,
-            current_ts=current_ts,
         )
         print("User cache updated")
 

@@ -12,6 +12,7 @@ from modules.redis import RedisHandler
 from modules.redis import UserCache
 
 from .eventsub_models import Event
+from .eventsub_models import TokenValidation
 from .eventsub_models import TwitchUser
 
 TWITCH_MESSAGE_ID = "twitch-eventsub-message-id"
@@ -19,6 +20,7 @@ TWITCH_MESSAGE_TIMESTAMP = "twitch-eventsub-message-timestamp"
 TWITCH_MESSAGE_SIGNATURE = "twitch-eventsub-message-signature"
 HMAC_PREFIX = "sha256="
 REDIRECT_URI = f"{EnvWrapper().GRIMM_SUBDOMAIN}/eventsub/auth"
+TWITCH_TOKEN_ENDPOINT = "https://id.twitch.tv/oauth2/token"
 
 
 def get_hmac_message(request: Request, rawbody: str):
@@ -51,14 +53,22 @@ def check_dup_events(event: Event):
         RedisHandler().set_pair(name=event.event.id, value=1, expiration=300)
 
 
-def get_user_token_params(code=str):
-    return {
+def get_user_token_params(
+    grant_type: str,
+    code: str | None = None,
+    refresh_token: str | None = None,
+):
+    params = {
         "client_id": EnvWrapper().TWITCH_APP_ID,
         "client_secret": EnvWrapper().TWITCH_APP_SECRET,
-        "code": code,
-        "grant_type": "authorization_code",
-        "redirect_uri": REDIRECT_URI,
+        "grant_type": grant_type,
     }
+    if code:
+        params["code"] = code
+        params["redirect_uri"] = REDIRECT_URI
+    if refresh_token:
+        params["refresh_token"] = refresh_token
+    return params
 
 
 def get_app_token_params():
@@ -74,13 +84,12 @@ def get_access_token():
     if token:
         return token
 
-    url = "https://id.twitch.tv/oauth2/token"
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     body = get_app_token_params()
 
     token = make_request(
         method="POST",
-        url=url,
+        url=TWITCH_TOKEN_ENDPOINT,
         headers=headers,
         body=body,
         class_type=OauthToken,
@@ -95,13 +104,12 @@ def get_access_token():
 
 
 def get_user_access_token(code: str) -> OauthToken:
-    url = "https://id.twitch.tv/oauth2/token"
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
-    body = get_user_token_params(code=code)
+    body = get_user_token_params(grant_type="authorization_code", code=code)
 
     token = make_request(
         method="POST",
-        url=url,
+        url=TWITCH_TOKEN_ENDPOINT,
         headers=headers,
         body=body,
         class_type=OauthToken,
@@ -132,6 +140,58 @@ def get_user_cache(channel_name: str) -> UserCache:
             status_code=400,
             custom_message="Please re-authorize twitch before performing this action",
         )
+
+    if not is_valid_oauth_token(token=user_cache.twitch_user_token):
+        user_cache = refresh_user_token(user_cache=user_cache)
+    return user_cache
+
+
+def is_valid_oauth_token(token: str):
+    url = "https://id.twitch.tv/oauth2/validate"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+    }
+    token_status = make_request(
+        method="GET",
+        url=url,
+        headers=headers,
+        class_type=TokenValidation,
+    )
+    if not isinstance(token_status, TokenValidation):
+        return False
+    return token_status.expires_in > 60
+
+
+def refresh_user_token(user_cache: UserCache):
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    body = get_user_token_params(
+        grant_type="refresh_token",
+        refresh_token=user_cache.twitch_user_refresh_token,
+    )
+
+    new_token = make_request(
+        method="POST",
+        url=TWITCH_TOKEN_ENDPOINT,
+        headers=headers,
+        body=body,
+        class_type=OauthToken,
+    )
+
+    if not isinstance(new_token, OauthToken):
+        return_status_response(
+            status_code=400,
+            custom_message="There was a problem authorizing twitch or your session has ended",
+        )
+
+    user_cache = parse_token_data_into_cache(user_cache=user_cache, new_token=new_token)
+
+    RedisHandler().set_dict(
+        name=user_cache.twitch_channel_name,
+        payload=user_cache.model_dump(exclude_none=True),
+    )
+
+    print("User token refreshed")
     return user_cache
 
 
@@ -176,25 +236,21 @@ def get_events_info(event_name: str):
 def parse_user_data_into_cache(
     new_user: TwitchUser,
     new_token: OauthToken,
-    current_ts: float,
 ) -> UserCache:
     return UserCache(
         twitch_channel_name=new_user.login,
         twitch_channel_id=new_user.id,
         twitch_user_token=new_token.access_token,
         twitch_user_refresh_token=new_token.refresh_token,
-        twitch_user_token_expiration=current_ts + new_token.expires_in,
     )
 
 
 def parse_token_data_into_cache(
     user_cache: UserCache,
     new_token: OauthToken,
-    current_ts: float,
 ) -> UserCache:
     user_cache.twitch_user_token = new_token.access_token
     user_cache.twitch_user_refresh_token = new_token.refresh_token
-    user_cache.twitch_user_token_expiration = current_ts + new_token.expires_in
 
     return user_cache
 

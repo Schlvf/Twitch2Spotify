@@ -65,3 +65,11 @@ class CustomReward(BaseModel):
 
 class CustomRewardsQuery(BaseModel):
     data: list[CustomReward | None]
+
+
+class TokenValidation(BaseModel):
+    client_id: str
+    login: str
+    user_id: str
+    scopes: list[str]
+    expires_in: int
