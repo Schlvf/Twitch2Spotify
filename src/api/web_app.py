@@ -29,6 +29,14 @@ async def home_page(request: Request):
     )
 
 
+@app.get("/about", response_class=HTMLResponse)
+async def about_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="about.html",
+    )
+
+
 @app.get("/ping")
 async def ping():
     return {"message": "Pong!"}
