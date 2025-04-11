@@ -29,7 +29,7 @@ def make_request(
 
     result = request(**request_data)
 
-    print("> status code: ", result.status_code)
+    print(f"> {result.status_code} - {url}")
 
     if class_type:
         try:

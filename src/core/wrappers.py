@@ -29,7 +29,7 @@ def time_diff(func):
             time_b = datetime.now()
             time_delta = time_b - time_a
 
-            print(f"    >   Task ended after {time_delta.total_seconds()} seconds")
+            print(f"REDIS - Task ended after {time_delta.total_seconds()} seconds")
             return res
         except Exception as e:
             # logger.error(e, extra={"Error class: ": type(e)})
