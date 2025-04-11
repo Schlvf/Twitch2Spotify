@@ -3,7 +3,7 @@ from typing import TypeVar
 from requests import request
 from requests.models import Response
 
-METHODS = ["GET", "POST", "DELETE", "PUT"]
+METHODS = ["GET", "POST", "DELETE", "PUT", "PATCH"]
 T = TypeVar("T")
 
 
