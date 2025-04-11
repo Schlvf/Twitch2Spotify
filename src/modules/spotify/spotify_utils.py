@@ -44,23 +44,15 @@ def make_spotify_request(
         body=body,
         params=params,
     )
-    print(">>>", res.status_code)
-    if res.status_code == 200:
-        print("SPOTI REQUEST CONTENT:", res.content)
-        # checking for string due to spotify api issue
-        try:
-            return res.json()
-        except Exception:
-            print("Song added to queue but API response still broken")
-            return
-        # return res.json()
+
     if res.status_code == 204:
-        print("Song added to queue")
-        return
-    if res.status_code == 401:
-        print("Token invalid...")
-    print("ERROR LOG", res.json())
-    return res.json()
+        print("Song added to the queue")
+
+    try:
+        return res.json()
+    except Exception:
+        print("Spotify sent a broken response")
+        return {}
 
 
 def refresh_access_token(user_cache: UserCache):

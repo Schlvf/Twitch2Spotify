@@ -24,6 +24,7 @@ class EventInfo(BaseModel):
     broadcaster_user_id: str | None = None
     reward: RewardField | None = None
     user_input: str | None = None
+    user_name: str | None = None
     broadcaster_user_login: str | None = None
 
 

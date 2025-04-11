@@ -39,7 +39,9 @@ async def generate_access_token(channel_name: str, code: str):
 
 @router.get("/request_song", dependencies=[Depends(sudo_auth)])
 async def request_song(link: str, user_name: str):
-    add_song_to_queue(link=link, user_name=user_name)
+    response = add_song_to_queue(link=link, user_name=user_name)
+    if response.get("error"):
+        return response
     return {
         "Sent": link,
     }

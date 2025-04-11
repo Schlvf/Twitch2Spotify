@@ -10,7 +10,7 @@ def add_song_to_queue(link: str, user_name: str):
         return
     url = API_ENDPOINT + "/queue"
     params = {"uri": parse_link_to_uri(link=link)}
-    make_spotify_request(
+    return make_spotify_request(
         method="POST",
         url=url,
         params=params,

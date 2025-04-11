@@ -34,33 +34,24 @@ async def callback_endpoint(
 ):
     rawbody = await request.body()
     if not authenticate_hmac(request=request, rawbody=rawbody.decode()):
-        print("Unauthorized petition")
+        print("\n*** UNAUTHORIZED PETITION ***")
         response.status_code = 401
         return
 
-    print("\n*** Event triggered ***")
-
-    # """REMOVE THIS LATER"""
-    # import json
-
-    # print("\n*** THIS IS A DEBUG MESSAGE ***\n")
-    # print(json.dumps(event.model_dump(), indent=4))
-    # print("\n*** END OF THE MESSAGE ***")
-
     if check_dup_events(event=event):
-        print("*** SKIPPING DUP ***")
+        print("\n*** SKIPPING DUP ***")
         return
 
     event_type = request.headers.get("Twitch-Eventsub-Message-Type")
 
     if event_type == "notification":
-        print("*** Subscription received ***")
+        print("\n*** SUBSCRIPTION RECEIVED ***")
         solve_event(event=event)
     if event_type == "webhook_callback_verification":
-        print("*** Challenge received ***")
+        print("\n*** CHALLENGE RECEIVED ***")
         return event.challenge
     if event_type == "revocation":
-        print("*** Revocation event ***")
+        print("\n*** REVOCATION RECEIVED ***")
     return
 
 

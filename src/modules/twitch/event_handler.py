@@ -25,7 +25,11 @@ def solve_channel_points_event(event: Event):
     if "song request" in reward_name:
         link = event.event.user_input
         user_name = event.event.broadcaster_user_login
-        add_song_to_queue(link=link, user_name=user_name)
+
+        response = add_song_to_queue(link=link, user_name=user_name)
+        if response.get("error"):
+            update_custom_reward_status(event_data=event.event, is_completed=False)
+        return
 
     print("EVENT IGNORED")
 
@@ -61,6 +65,6 @@ def update_custom_reward_status(event_data: EventInfo, is_completed: bool = True
     )
 
     if response.status_code == 200:
-        print(f"Successfully updated custom reward status to {new_status}")
+        print(f"Reward by {event_data.user_name} updated to {new_status}")
     else:
-        print(f"Failed to update custom reward status to {new_status}")
+        print(f"Failed to update custom reward status by {event_data.user_name}")
