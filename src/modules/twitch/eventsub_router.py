@@ -5,10 +5,10 @@ from fastapi import Response
 from fastapi.responses import PlainTextResponse
 from fastapi.templating import Jinja2Templates
 
+from api import get_spotify_auth_url
+from api import get_spotify_code_url
 from api import ResponseMessage
 from api import sudo_auth
-from modules.spotify import get_spotify_auth_url
-from modules.spotify import get_spotify_code_url
 
 from .event_handler import solve_event
 from .eventsub_handler import authorize_twitch_user

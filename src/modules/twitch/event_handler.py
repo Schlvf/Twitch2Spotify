@@ -1,6 +1,15 @@
+from api import return_status_response
+from core import EnvWrapper
+from core import make_request
 from modules.spotify import add_song_to_queue
 
 from .eventsub_models import Event
+from .eventsub_models import EventInfo
+from .twitch_utils import get_user_cache
+
+REDEMPTIONS_ENDPOINT = (
+    "https://api.twitch.tv/helix/channel_points/custom_rewards/redemptions"
+)
 
 
 def solve_event(event: Event):
@@ -19,3 +28,39 @@ def solve_channel_points_event(event: Event):
         add_song_to_queue(link=link, user_name=user_name)
 
     print("EVENT IGNORED")
+
+
+def update_custom_reward_status(event_data: EventInfo, is_completed: bool = True):
+    channel_name = event_data.broadcaster_user_login
+    user_cache = get_user_cache(channel_name=channel_name)
+    new_status = "FULFILLED" if is_completed else "CANCELED"
+
+    if not user_cache:
+        return_status_response(
+            status_code=400,
+            custom_message="Please re-authorize twitch before performing this action",
+        )
+
+    headers = {
+        "Authorization": f"Bearer {user_cache.twitch_user_token}",
+        "Client-Id": EnvWrapper().TWITCH_APP_ID,
+    }
+    params = {
+        "id": event_data.id,
+        "broadcaster_id": user_cache.twitch_channel_id,
+        "reward_id": event_data.reward.id,
+    }
+    body = {"status": new_status}
+
+    response = make_request(
+        method="PATCH",
+        url=REDEMPTIONS_ENDPOINT,
+        headers=headers,
+        params=params,
+        body=body,
+    )
+
+    if response.status_code == 200:
+        print(f"Successfully updated custom reward status to {new_status}")
+    else:
+        print(f"Failed to update custom reward status to {new_status}")

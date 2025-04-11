@@ -2,6 +2,8 @@ import urllib.parse
 
 from fastapi import HTTPException
 
+from core import EnvWrapper
+
 CUSTOM_RESPONSES = {
     201: "Created",
     400: "Bad request",
@@ -62,3 +64,18 @@ def return_status_response(
         raise HTTPException(status_code=status_code)
 
     raise HTTPException(status_code=status_code, detail=custom_message)
+
+
+def get_spotify_auth_url() -> str:
+    url = "https://accounts.spotify.com/authorize"
+    params = {
+        "client_id": EnvWrapper().SPOTIFY_APP_ID,
+        "redirect_uri": f"{EnvWrapper().GRIMM_SUBDOMAIN}/spotify/auth",
+        "response_type": "code",
+        "scope": "user-modify-playback-state user-read-playback-state",
+    }
+    return url + url_encode_params(params=params)
+
+
+def get_spotify_code_url(channel_name: str) -> str:
+    return f"{EnvWrapper().GRIMM_SUBDOMAIN}/spotify/validate_code/{channel_name}"

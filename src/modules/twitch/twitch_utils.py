@@ -136,14 +136,19 @@ def get_user_auth_params():
 def get_user_cache(channel_name: str) -> UserCache:
     user_cache = RedisHandler().get_dict(name=channel_name, class_type=UserCache)
     if not user_cache:
-        return_status_response(
-            status_code=400,
-            custom_message="Please re-authorize twitch before performing this action",
-        )
+        return
 
     if not is_valid_oauth_token(token=user_cache.twitch_user_token):
         user_cache = refresh_user_token(user_cache=user_cache)
+
     return user_cache
+
+
+def set_user_cache(user_cache: UserCache):
+    RedisHandler().set_dict(
+        name=user_cache.twitch_channel_name,
+        payload=user_cache.model_dump(exclude_none=True),
+    )
 
 
 def is_valid_oauth_token(token: str):
@@ -185,11 +190,7 @@ def refresh_user_token(user_cache: UserCache):
         )
 
     user_cache = parse_token_data_into_cache(user_cache=user_cache, new_token=new_token)
-
-    RedisHandler().set_dict(
-        name=user_cache.twitch_channel_name,
-        payload=user_cache.model_dump(exclude_none=True),
-    )
+    set_user_cache(user_cache=user_cache)
 
     print("User token refreshed")
     return user_cache

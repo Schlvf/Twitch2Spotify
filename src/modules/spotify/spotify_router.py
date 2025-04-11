@@ -3,12 +3,12 @@ from fastapi import Depends
 from fastapi import Request
 from fastapi.templating import Jinja2Templates
 
+from api import get_spotify_auth_url
 from api import ResponseMessage
 from api import sudo_auth
 
 from .spotify_handler import add_song_to_queue
 from .spotify_utils import get_new_access_token
-from .spotify_utils import get_spotify_auth_url
 
 router = APIRouter(prefix="/spotify")
 templates = Jinja2Templates(directory="dist")

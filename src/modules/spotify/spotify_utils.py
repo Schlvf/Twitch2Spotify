@@ -3,7 +3,6 @@ import re
 import time
 
 from api import return_status_response
-from api.api_utils import url_encode_params
 from core import EnvWrapper
 from core import make_request
 from modules.redis import RedisHandler
@@ -11,15 +10,6 @@ from modules.redis import UserCache
 
 REDIRECT_URI = f"{EnvWrapper().GRIMM_SUBDOMAIN}/spotify/auth"
 TOKEN_URL = "https://accounts.spotify.com/api/token"
-
-
-def get_user_auth_params():
-    return {
-        "client_id": EnvWrapper().SPOTIFY_APP_ID,
-        "redirect_uri": REDIRECT_URI,
-        "response_type": "code",
-        "scope": "user-modify-playback-state user-read-playback-state",
-    }
 
 
 def make_spotify_request(
@@ -61,7 +51,7 @@ def make_spotify_request(
         try:
             return res.json()
         except Exception:
-            print("Spotify API is still fucked")
+            print("Song added to queue but API response still broken")
             return
         # return res.json()
     if res.status_code == 204:
@@ -87,6 +77,7 @@ def refresh_access_token(user_cache: UserCache):
     )
     user_cache.spotify_auth_token = res.get("access_token")
     user_cache.spotify_expire_ts = current_ts + res.get("expires_in")
+
     RedisHandler().set_dict(
         name=user_cache.twitch_channel_name,
         payload=user_cache.model_dump(exclude_none=True),
@@ -116,6 +107,7 @@ def get_new_access_token(code: str, user_name: str):
         )
 
     user_cache = RedisHandler().get_dict(name=user_name, class_type=UserCache)
+
     if not user_cache:
         return_status_response(
             status_code=400,
@@ -125,8 +117,9 @@ def get_new_access_token(code: str, user_name: str):
     user_cache.spotify_auth_token = res.get("access_token")
     user_cache.spotify_refresh_token = res.get("refresh_token")
     user_cache.spotify_expire_ts = current_ts + res.get("expires_in")
+
     RedisHandler().set_dict(
-        name=user_name,
+        name=user_cache.twitch_channel_name,
         payload=user_cache.model_dump(exclude_none=True),
     )
 
@@ -164,13 +157,3 @@ def parse_link_to_uri(link: str):
 def token_is_expired(user_cache: UserCache):
     current_ts = time.time()
     return current_ts >= user_cache.spotify_expire_ts
-
-
-def get_spotify_auth_url() -> str:
-    url = "https://accounts.spotify.com/authorize"
-    params = get_user_auth_params()
-    return url + url_encode_params(params=params)
-
-
-def get_spotify_code_url(channel_name: str) -> str:
-    return f"{EnvWrapper().GRIMM_SUBDOMAIN}/spotify/validate_code/{channel_name}"

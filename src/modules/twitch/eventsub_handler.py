@@ -1,10 +1,9 @@
 from fastapi import HTTPException
 
 from api import return_status_response
+from core import EnvWrapper
 from core import make_request
-from core.wrappers import EnvWrapper
-from modules.redis.cache_models import UserCache
-from modules.redis.redis_handler import RedisHandler
+from modules.redis import UserCache
 
 from .eventsub_models import CustomReward
 from .eventsub_models import CustomRewardsQuery
@@ -18,13 +17,22 @@ from .twitch_utils import get_user_access_token
 from .twitch_utils import get_user_cache
 from .twitch_utils import parse_token_data_into_cache
 from .twitch_utils import parse_user_data_into_cache
+from .twitch_utils import set_user_cache
 
 URL = "https://api.twitch.tv/helix/eventsub/subscriptions"
+CUSTOM_REWARDS_ENDPOINT = "https://api.twitch.tv/helix/channel_points/custom_rewards"
+
 DEFAULT_EVENT = "channel.channel_points_custom_reward_redemption.add"
 
 
 def subscribe_to_event(channel_name: str, event_name: str = DEFAULT_EVENT):
     cached_user = get_user_cache(channel_name=channel_name)
+
+    if not cached_user:
+        return_status_response(
+            status_code=400,
+            custom_message="Please re-authorize twitch before performing this action",
+        )
 
     if event_name == DEFAULT_EVENT:
         song_request_reward = get_or_create_song_request_reward(user_cache=cached_user)
@@ -59,6 +67,11 @@ def subscribe_to_event(channel_name: str, event_name: str = DEFAULT_EVENT):
 
 def unsubscribe_user(channel_name: str):
     cached_user = get_user_cache(channel_name=channel_name)
+    if not cached_user:
+        return_status_response(
+            status_code=400,
+            custom_message="Please re-authorize twitch before performing this action",
+        )
 
     song_request_reward = get_or_create_song_request_reward(user_cache=cached_user)
     if song_request_reward.is_enabled:
@@ -118,7 +131,7 @@ def authorize_twitch_user(auth_code: str):
     user_access_token = get_user_access_token(code=auth_code)
     user_data = get_user_data(user_access_token=user_access_token.access_token)
 
-    user_cache = RedisHandler().get_dict(name=user_data.login, class_type=UserCache)
+    user_cache = get_user_cache(channel_name=user_data.login)
 
     if not user_cache:
         user_cache = parse_user_data_into_cache(
@@ -133,10 +146,7 @@ def authorize_twitch_user(auth_code: str):
         )
         print("User cache updated")
 
-    RedisHandler().set_dict(
-        name=user_cache.twitch_channel_name,
-        payload=user_cache.model_dump(exclude_none=True),
-    )
+    set_user_cache(user_cache=user_cache)
     return user_cache.twitch_channel_name
 
 
@@ -162,7 +172,6 @@ def get_user_data(user_access_token: str) -> TwitchUser:
 
 
 def get_or_create_song_request_reward(user_cache: UserCache) -> CustomReward:
-    url = "https://api.twitch.tv/helix/channel_points/custom_rewards"
     headers = {
         "Authorization": f"Bearer {user_cache.twitch_user_token}",
         "Client-Id": EnvWrapper().TWITCH_APP_ID,
@@ -172,7 +181,7 @@ def get_or_create_song_request_reward(user_cache: UserCache) -> CustomReward:
     }
     current_rewards = make_request(
         method="GET",
-        url=url,
+        url=CUSTOM_REWARDS_ENDPOINT,
         headers=headers,
         params=params,
         class_type=CustomRewardsQuery,
@@ -192,7 +201,7 @@ def get_or_create_song_request_reward(user_cache: UserCache) -> CustomReward:
     if not song_request_reward:
         new_rewards = make_request(
             method="POST",
-            url=url,
+            url=CUSTOM_REWARDS_ENDPOINT,
             headers=headers,
             params=params,
             body=get_new_song_request_reward_dict(),
@@ -222,7 +231,6 @@ def set_reward_status(
     user_cache: UserCache,
     is_enabled: bool = True,
 ) -> CustomReward:
-    url = "https://api.twitch.tv/helix/channel_points/custom_rewards"
     headers = {
         "Authorization": f"Bearer {user_cache.twitch_user_token}",
         "Client-Id": EnvWrapper().TWITCH_APP_ID,
@@ -234,7 +242,7 @@ def set_reward_status(
     body = {"is_enabled": is_enabled}
     updated_reward = make_request(
         method="PATCH",
-        url=url,
+        url=CUSTOM_REWARDS_ENDPOINT,
         headers=headers,
         params=params,
         body=body,

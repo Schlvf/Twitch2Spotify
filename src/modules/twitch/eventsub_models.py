@@ -1,11 +1,11 @@
 from pydantic import BaseModel
 
 
-class ConditionField(BaseModel, extra="allow"):
+class ConditionField(BaseModel):
     broadcaster_user_id: str | None = None
 
 
-class SubscriptionField(BaseModel, extra="allow"):
+class SubscriptionField(BaseModel):
     id: str | None = None
     contidion: ConditionField | None = None
     type: str | None = None
@@ -13,13 +13,13 @@ class SubscriptionField(BaseModel, extra="allow"):
     cost: int | None = None
 
 
-class RewardField(BaseModel, extra="allow"):
+class RewardField(BaseModel):
     id: str | None = None
     title: str | None = None
     cost: int | None = None
 
 
-class EventInfo(BaseModel, extra="allow"):
+class EventInfo(BaseModel):
     id: str | None = None
     broadcaster_user_id: str | None = None
     reward: RewardField | None = None
