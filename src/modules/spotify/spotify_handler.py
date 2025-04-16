@@ -6,8 +6,8 @@ API_ENDPOINT = "https://api.spotify.com/v1/me/player"
 
 def add_song_to_queue(link: str, user_name: str):
     if "track" not in link:
-        print("NO TRACK URL")
-        return
+        print("INCORRECT OR INVALID TRACK URL")
+        return {"error": "Incorrect or invalid track url"}
     url = API_ENDPOINT + "/queue"
     params = {"uri": parse_link_to_uri(link=link)}
     return make_spotify_request(
