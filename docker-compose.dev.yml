@@ -1,10 +1,10 @@
 services:
   # Redis service for the grimm-api
   grimm-redis:
-    image:           redis:7.4.2-bookworm
-    container_name:  grimm-redis
-    command:         redis-server --save 300 1 --loglevel warning --port 6379
-    restart:         unless-stopped
+    image: redis:7.4.2-bookworm
+    container_name: grimm-redis
+    command: redis-server --save 300 1 --loglevel warning --port 6379
+    restart: unless-stopped
     volumes:
       - cache:/data
     networks:
@@ -14,9 +14,9 @@ services:
 
   # Main API service, dependent on Redis
   grimm-api:
-    build:           .
-    container_name:  grimm-api
-    restart:         always
+    build: .
+    container_name: grimm-api
+    restart: always
     ports:
       - ${PORT}:${PORT}
     expose:
@@ -30,10 +30,10 @@ services:
 
   # Volume ownership fix (important for Zrok container's permissions)
   zrok-init:
-    image:           busybox
-    command:         chown -Rc 2171:2171 /mnt/
-    container_name:  zrok-init
-    user:            root
+    image: busybox
+    command: chown -Rc 2171:2171 /mnt/
+    container_name: zrok-init
+    user: root
     volumes:
       - zrok_env:/mnt
     networks:
@@ -45,9 +45,9 @@ services:
 
   # Enable Zrok environment (auth/enable step)
   zrok-enable:
-    image:           ${ZROK_CONTAINER_IMAGE:-docker.io/openziti/zrok}
-    entrypoint:      zrok-enable.bash
-    container_name:  zrok-enable
+    image: openziti/zrok:latest  # Use the latest version of the Zrok image
+    entrypoint: zrok-enable.bash
+    container_name: zrok-enable
     depends_on:
       zrok-init:
         condition: service_completed_successfully
@@ -64,19 +64,19 @@ services:
 
   # Zrok tunnel service (exposed to the web)
   zrok-share:
-    image:           ${ZROK_CONTAINER_IMAGE:-docker.io/openziti/zrok}
-    container_name:  zrok-share
-    entrypoint:      zrok-share.bash
-    restart:         unless-stopped
+    image: openziti/zrok:latest  # Use the latest version of the Zrok image
+    container_name: zrok-share
+    entrypoint: zrok-share.bash
+    restart: unless-stopped
     depends_on:
       zrok-enable:
         condition: service_completed_successfully
     volumes:
       - zrok_env:/mnt
     environment:
-      HOME:            /mnt
-      ZROK_TARGET:     "http://grimm-api:${PORT}"
-      PFXLOG_NO_JSON:  "true"
+      HOME: /mnt
+      ZROK_TARGET: "http://grimm-api:${PORT}"
+      PFXLOG_NO_JSON: "true"
     networks:
       - grimm-network
     env_file:
