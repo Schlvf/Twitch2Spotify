@@ -70,7 +70,7 @@ def get_spotify_auth_url() -> str:
     url = "https://accounts.spotify.com/authorize"
     params = {
         "client_id": EnvWrapper().SPOTIFY_APP_ID,
-        "redirect_uri": f"{EnvWrapper().GRIMM_SUBDOMAIN}/spotify/auth",
+        "redirect_uri": f"{EnvWrapper().APP_SUBDOMAIN}/spotify/auth",
         "response_type": "code",
         "scope": "user-modify-playback-state user-read-playback-state",
     }
@@ -78,4 +78,4 @@ def get_spotify_auth_url() -> str:
 
 
 def get_spotify_code_url(channel_name: str) -> str:
-    return f"{EnvWrapper().GRIMM_SUBDOMAIN}/spotify/validate_code/{channel_name}"
+    return f"{EnvWrapper().APP_SUBDOMAIN}/spotify/validate_code/{channel_name}"

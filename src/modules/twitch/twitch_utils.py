@@ -19,7 +19,7 @@ TWITCH_MESSAGE_ID = "twitch-eventsub-message-id"
 TWITCH_MESSAGE_TIMESTAMP = "twitch-eventsub-message-timestamp"
 TWITCH_MESSAGE_SIGNATURE = "twitch-eventsub-message-signature"
 HMAC_PREFIX = "sha256="
-REDIRECT_URI = f"{EnvWrapper().GRIMM_SUBDOMAIN}/eventsub/auth"
+REDIRECT_URI = f"{EnvWrapper().APP_SUBDOMAIN}/eventsub/auth"
 TWITCH_TOKEN_ENDPOINT = "https://id.twitch.tv/oauth2/token"
 
 
@@ -210,7 +210,7 @@ def get_subscription_body(user_id: str, event_name: str, reward_id: str | None =
         "condition": conditions,
         "transport": {
             "method": "webhook",
-            "callback": f"{EnvWrapper().GRIMM_SUBDOMAIN}/eventsub/callback",
+            "callback": f"{EnvWrapper().APP_SUBDOMAIN}/eventsub/callback",
             "secret": EnvWrapper().TWITCH_HMAC_SECRET,
         },
     }
@@ -263,8 +263,8 @@ def get_twitch_auth_url() -> str:
 
 
 def get_enable_url(channel_name: str) -> str:
-    return f"{EnvWrapper().GRIMM_SUBDOMAIN}/eventsub/enable_integration/{channel_name}"
+    return f"{EnvWrapper().APP_SUBDOMAIN}/eventsub/enable_integration/{channel_name}"
 
 
 def get_disable_url(channel_name: str) -> str:
-    return f"{EnvWrapper().GRIMM_SUBDOMAIN}/eventsub/disable_integration/{channel_name}"
+    return f"{EnvWrapper().APP_SUBDOMAIN}/eventsub/disable_integration/{channel_name}"

@@ -62,8 +62,8 @@ class EnvWrapper:
         return os.getenv("twitch_app_secret")
 
     @property
-    def GRIMM_SUBDOMAIN(self):
-        return os.getenv("grimm_subdomain")
+    def APP_SUBDOMAIN(self):
+        return os.getenv("app_subdomain")
 
     @property
     def SPOTIFY_APP_ID(self):

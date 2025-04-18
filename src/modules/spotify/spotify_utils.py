@@ -8,7 +8,7 @@ from core import make_request
 from modules.redis import RedisHandler
 from modules.redis import UserCache
 
-REDIRECT_URI = f"{EnvWrapper().GRIMM_SUBDOMAIN}/spotify/auth"
+REDIRECT_URI = f"{EnvWrapper().APP_SUBDOMAIN}/spotify/auth"
 TOKEN_URL = "https://accounts.spotify.com/api/token"
 
 
