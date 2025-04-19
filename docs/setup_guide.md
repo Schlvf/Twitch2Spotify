@@ -17,7 +17,7 @@ If you know what `git` is and you have it installed simply run `git clone https:
 If you don't have `git` please follow these steps:
 1. Go to the main screen in the repository and click on the green button with the text `<> Code`
 2. Click on `Download as zip`
-3. Create a folder in your host machine and decompress the zip file inside the folder
+3. Create a folder in your computer or server and decompress the zip file inside the folder
 
 ## Setup
 ### STEP 1 - The configuration file
@@ -126,9 +126,11 @@ Example: `spotify_app_secret = tx6wm3rkfebg6u4cyvisx2935nl`
 ### STEP 4 - Setting up Zrok:
 #### *(If you have your own domain and SSL certificates you can skip this step)*
 
-Both the Twitch and Spotify APIs require you to be able to expose the webhook on a static HTTPS domain. This can be achieved by owning your own web domain and SSL certificates, or in this case, by using a web tunneling tool like Zrok
+Both the Twitch and Spotify APIs require you to be able to expose the webhook on a static HTTPS domain\
+This can be achieved by owning your own web domain and SSL certificates, or in this case, by using a web tunneling tool like Zrok
 
-The reason why Zrok was chosen over all the other available options is because it was highly suitable for our particular use case given that it allows you to have a reserved static domain with certificates for free and it was also highly compatible with Docker environments. The only downside of Zrok is that you can only transfer 5Gb of data daily, but this is something that shouldn't be an issue since we will be making and receiving simple HTTP requests and you would need hundreds of thousands of them to reach that limit
+The reason why Zrok was chosen over all the other available options is because it was the most suitable for our specific use case as it allows you to have a reserved domain with certificates for free and it is highly compatible with Docker environments\
+The only downside of Zrok is that you can only transfer 5Gb of data daily, but this is something that shouldn't be an issue since we will be making and receiving simple HTTP requests and you would need hundreds of thousands of them to reach that limit
 
 1. The first thing you must do is visit the [official Zrok website](https://zrok.io/) and creating your account\
 You can do this by clicking on `Get started` and then clicking on `Account`

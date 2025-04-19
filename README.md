@@ -18,6 +18,7 @@ The tool listens to Twitch so when a chatter uses a determined channel point red
 
 ## Limitations
 <details>
+These are dropdown windows
 <summary>You must have a premium Spotify account</summary>
 
 The free Spotify plan is subject to multiple restrictions that will interfere with the tool, this is why a premium subscription is needed. However, please note that any premium plan will work. You can find more details about the plans in the [official Spotify plans page](https://www.spotify.com/co-en/premium/)
