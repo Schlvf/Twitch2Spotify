@@ -21,37 +21,36 @@ If you don't have `git` please follow these steps:
 
 ## Setup
 ### STEP 1 - The configuration file
-Regardless of the deployment method you will choose later on, you must prepare a **`.env`** file that will help you set the basic configuration needed to run the project so start by creating a new file and name it `.env`.
+Regardless of the deployment method you will choose later on, you must prepare a **`.env`** file that will help you set the basic configuration needed to run the project so start by creating a new file and name it `.env`
 
-Once created copy and paste the example from below. We will be editing these values in the following steps
+Once created copy and paste the example from below. We will be editing these values as we progress in the guide
 
-<details>
-<summary><b>Example of .env file</b></summary>
+#### Example of .env file
 
 ```conf
 PORT = 8000
-ENV = "dev"
+ENV = dev
 
-sudo_auth = "my_secret_passcode"
+redis_host = grimm-redis
 
-twitch_app_id = "your_twitch_app_id"
-twitch_app_secret = "your_twitch_app_secret"
-twitch_hmac_secret = "the_passcode_you_made"
+sudo_auth = the_passcode_you_made
+twitch_hmac_secret = the_passcode_you_made
 
-spotify_app_id = "your_spotify_app_id"
-spotify_app_secret = "your_spotify_app_secret"
+twitch_app_id = your_twitch_app_id
+twitch_app_secret = your_twitch_app_secret
 
-redis_host = "grimm-redis"
 
-ZROK_ENABLE_TOKEN = "your_zrok_token"
-ZROK_UNIQUE_NAME = "your_desired_subdomain"
+spotify_app_id = your_spotify_app_id
+spotify_app_secret = your_spotify_app_secret
 
-app_subdomain = "https://{your_desired_subdomain}.share.zrok.io"
+ZROK_ENABLE_TOKEN = your_zrok_token
+ZROK_UNIQUE_NAME = your_desired_subdomain
 
-# ssl_key_file = "path_to_your_key.pem"
-# ssl_cert_file = "path_to_your_cert.pem"
+app_subdomain = https://{your_desired_subdomain}.share.zrok.io
+
+# ssl_key_file = path_to_your_key.pem
+# ssl_cert_file = path_to_your_cert.pem
 ```
-</details>
 
 This is a detailed breakdown of each configuration variable that our `.env` file must contain and its purpose:
 
@@ -59,13 +58,13 @@ This is a detailed breakdown of each configuration variable that our `.env` file
 |-|-|
 |**PORT**|This will be the port in which our web server will be running. You can default it to `8000` or any other available port of your choice. *(If you're planning to use  your own SSL certificates it must be **`443`** since that's the default HTTPS port)*|
 |**ENV**|This defines the environment we're aiming to deploy to. It can be either **`dev`** or **`prod`**. Default it to `dev`. *(If you're planning to use your own SSL certificates it must be `prod`)*|
+|**redis_host**|This corresponds to the connection string for our Redis. Default it to `grimm-redis`. *(If you're not using Docker you must change this accordingly to your Redis service host)*|
 |**sudo_auth**|This will be a random passcode/string that we will create and need to send in our request header to access our protected API endpoints. For testing purposes, it is recommended to use something easy to remember|
 |**twitch_app_id**|This will be the id corresponding to the Twitch App that we will create later on in the guide. For now leave it empty|
 |**twitch_app_secret**|This is the secret of the app we mentioned above. For now leave it empty|
 |**twitch_hmac_secret**|This will be a random passcode/string that we will create and use to authenticate the events that our webhook receives. Just make sure it is at least 12 characters long and don't use special symbols|
 |**spotify_app_id**|This will be the id corresponding to the Spotify App that we will create later on in the guide. For now leave it empty|
 |**spotify_app_secret**|This is the secret of the app we mentioned above. For now leave it empty|
-|**redis_host**|This corresponds to the connection string for our Redis. Default it to `grimm-redis`. *(If you're not using Docker you must change this accordingly to your Redis service host)*|
 |**ZROK_ENABLE_TOKEN**|This is the access token to our Zrok environment. For now leave it empty. *(If you're using your own SSL certificates you can skip everything involving Zrok and simply pass them to the web server directly)*|
 |**ZROK_UNIQUE_NAME**|This will be the subdomain for the Zrok URL that you want to reserve. You can name it whatever you want but please note that if the name has been already claimed by another user you will need to change it. For example, if you reserve `toaster` as the name, the full URL will look like this: `https://toaster.share.zrok.io`|
 |**app_subdomain**|This will be the full URL that we will be exposing to the internet. Default it to the Zrok URL from above and replace your reserved subdomain|
@@ -74,9 +73,75 @@ This is a detailed breakdown of each configuration variable that our `.env` file
 
 You can leave empty the `ssl_key_file` and `ssl_cert_file` if you're using Zrok
 
-For `sudo_auth` and `twitch_hmac_secret` simply make a random alphanumeric string with at least 12 characters and then replace the values in the file
+#### Now lets make the first changes to the config file
 
-### STEP 2 - Setting up Twitch:
+For `sudo_auth` and `twitch_hmac_secret` we need to make a passcode composed of only alphabet letters and numbers with at least 12 characters in total\
+If you want some help creating secure passcodes you can use a generator like [LastPass](https://www.lastpass.com/features/password-generator) but make sure that you **disable symbols** so it doesn't include any special characters
+
+If you did everything correctly, the new values in your `.env` file should look like this:
+
+```config
+...
+
+sudo_auth = HqN128DFCaT4
+twitch_hmac_secret = 7ZsSx5hm12v7
+
+...
+```
+
+### STEP 2 - Setting up Zrok:
+#### *(If you have your own domain and SSL certificates you can skip this step)*
+
+Both the Twitch and Spotify APIs require you to be able to expose the webhook on a static HTTPS domain\
+This can be achieved by owning your own web domain and SSL certificates, or in this case, by using a web tunneling tool like Zrok
+
+The reason why Zrok was chosen over all the other available options is because it was the most suitable for our specific use case as it allows you to have a reserved domain with certificates for free and it is highly compatible with Docker environments\
+The only downside of Zrok is that you can only transfer 5Gb of data daily, but this is something that shouldn't be an issue since we will be making and receiving simple HTTP requests and you would need hundreds of thousands of them to reach that limit
+
+1. The first thing you must do is visit the [official Zrok website](https://zrok.io/) and creating your account\
+You can do this by clicking on `Get started` and then clicking on `Account`
+
+2. Once you've created your account, you'll receive a verification email. Just go to your inbox and follow the steps in said message
+
+3. Now you should have access to both the [Zrok dashboard](https://myzrok.io/dashboard) and the [Zrok API web console](https://api.zrok.io/) so let's start by visiting the web console
+
+4. In the web console you will have a tab that will display your `Environments` that should be empty, and right next to it there should be a tab called `Detail`. Once you've found it, click on it and then reveal and copy the `Token` right under your email and replace it in the `.env` file\
+Example: `ZROK_ENABLE_TOKEN = L18IWW083N6`
+
+
+5. Now you need to define the unique subdomain name that you want. This will be reflected in the URL that you will use to access the tool dashboard.\
+For instance, if the name you choose is `toaster`, the URL that Zrok gives you will be `https://toaster.share.zrok.io`\
+
+**Before you move to the next step please make sure that the subdomain name meets the following criteria:**
+
+- It should be at least 10 characters
+- It uses only alphabet letters and numbers, special characters can be problematic
+- Since it must be unique you can add your user name at the end to reduce the chances that somebody already took it
+
+*The guide will use `toaster` for the following examples but you should make sure to follow the criteria from above in your subdomain name*
+
+6. Once you defined the subdomain name, assign it to the key `ZROK_UNIQUE_NAME` in the `.env` file\
+Example: `ZROK_UNIQUE_NAME = toaster`
+
+7. Finally, copy and replace the previous name in the following URL's subdomain:\
+`https://{your_name_goes_here}.share.zrok.io`\
+Now assign the new URL to the key `app_subdomain` in the `.env` file\
+Example: `app_subdomain = https://toaster.share.zrok.io`
+
+If you did everything correctly, the new values in your `.env` file should look like this:
+
+```config
+...
+
+ZROK_ENABLE_TOKEN = L18IWW083N6
+ZROK_UNIQUE_NAME = toaster
+
+app_subdomain = https://toaster.share.zrok.io
+
+...
+```
+
+### STEP 3 - Setting up Twitch:
 We need to create a Twitch App in the Twitch developer portal and update our `.env` file accordingly
 
 1. Visit the [Twitch developer portal](https://dev.twitch.tv/) and log into your account
@@ -97,7 +162,18 @@ Example: `twitch_app_id = n5b7yckjnriy10vrl9bu6l804cyj`
 7. Click on `New secret` to generate a new secret, then copy it and replace it in the `.env` file\
 Example: `twitch_app_secret = tx6wm3rkfebg6u4cyvisx2935nl`
 
-### STEP 3 - Setting up Spotify:
+If you did everything correctly, the new values in your `.env` file should look like this:
+
+```config
+...
+
+twitch_app_id = n5b7yckjnriy10vrl9bu6l804cyj
+twitch_app_secret = tx6wm3rkfebg6u4cyvisx2935nl
+
+...
+```
+
+### STEP 4 - Setting up Spotify:
 We need to create a Spotify App in the Spotify developer portal and update our `.env` file accordingly
 
 1. Visit the [Spotify developer portal](https://developer.spotify.com/) and log into your account
@@ -123,38 +199,15 @@ Example: `spotify_app_secret = tx6wm3rkfebg6u4cyvisx2935nl`
 10. In the `User management` tab fill the `Full name` field with your user name and the `Email` field with the email associated to your own Spotify account and finally click on `Add user`
 11. *(Optional)* If you plan to host the tool for multiple Spotify accounts, you must repeat the previous step with their corresponding details. Keep in mind that the limit is 25
 
-### STEP 4 - Setting up Zrok:
-#### *(If you have your own domain and SSL certificates you can skip this step)*
-
-Both the Twitch and Spotify APIs require you to be able to expose the webhook on a static HTTPS domain\
-This can be achieved by owning your own web domain and SSL certificates, or in this case, by using a web tunneling tool like Zrok
-
-The reason why Zrok was chosen over all the other available options is because it was the most suitable for our specific use case as it allows you to have a reserved domain with certificates for free and it is highly compatible with Docker environments\
-The only downside of Zrok is that you can only transfer 5Gb of data daily, but this is something that shouldn't be an issue since we will be making and receiving simple HTTP requests and you would need hundreds of thousands of them to reach that limit
-
-1. The first thing you must do is visit the [official Zrok website](https://zrok.io/) and creating your account\
-You can do this by clicking on `Get started` and then clicking on `Account`
-
-2. Once you've created your account, you'll receive a verification email. Just go to your inbox and follow the steps in said message
-
-3. Now you should have access to both the [Zrok dashboard](https://myzrok.io/dashboard) and the [Zrok API web console](https://api.zrok.io/) so let's start by visiting the web console
-
-4. In the web console you will have a tab that will display your `Environments` that should be empty, and right next to it there should be a tab called `Detail`. Once you've found it, click on it and then reveal and copy the `Token` right under your email and replace it in the `.env` file\
-Example: `ZROK_ENABLE_TOKEN = L18IWW083N6`
-
-5. Now you must assign or validate that the value of the key `ZROK_UNIQUE_NAME` in the `.env` file matches the subdomain in the URLs that you passed in the step `2` and `3`\
-In other words, if your `ZROK_UNIQUE_NAME` is equals to `toaster` the URLs passed for the redirects of the Spotify and Twitch apps will start with `https://{toaster}.share.zrok.io` and end with `/{eventsub or spotify}/auth` respectively
-
-6. Finally, assign the reserved Zrok URL to the `.env` file\
-Example: `app_subdomain = https://toaster.share.zrok.io`
-
 If you did everything correctly, the new values in your `.env` file should look like this:
 
 ```config
 ...
-ZROK_ENABLE_TOKEN = L18IWW083N6
-ZROK_UNIQUE_NAME = toaster
-app_subdomain = https://toaster.share.zrok.io
+
+spotify_app_id = n5b7yckjnriy10vrl9bu6l804cyj
+spotify_app_secret = tx6wm3rkfebg6u4cyvisx2935nl
+
+...
 ```
 
 ### STEP 5 - Building and running the tool
@@ -189,16 +242,19 @@ When the tool was tested on a Windows machine running in the background it avera
 
 I deployed this exact same project in the cheapest Digital Ocean droplet available, which only cost me $4 usd/month and I never had to worry about resources on my pc or having to leave it turned on so my friends could use the tool while I'm not home
 
-<details>
-<summary><b>Having issues with Docker?</b></summary>
+### Having issues?
 
-In case you've never used Docker before, the following commands will help you with most issues
+In case you've never used Docker before, the following commands will help you navigate through docker, see logs, rebuild the project or delete everything
 
 |Command|What it does|
 |-|-|
-|**Docker ps -a**|This will allow you to see all the containers and their ids even if they're not running|
-|**Docker logs -f -t `container_id`**|This will let you see the console logs(*stdout*) of your container in real time|
-|**Docker stats**|This will let you see the resources used by your containers in real time|
-|**Docker system prune**|This will let you delete **all** the unused or stopped containers/images to free space, therefore, **use with caution**|
-|**Docker Compose up -d --force-recreate**|This will let you rebuild and rerun the entire project in case you made changes to it|
-</details>
+|**docker ps -a**|This will allow you to see all the containers and their ids even if they're not running|
+|**docker stop `container_id`**|This will allow you to stop any running container|
+|**docker logs -f -t `container_id`**|This will let you see the console logs(*stdout*) of your container in real time|
+|**docker stats**|This will let you see the resources used by your containers in real time|
+|**docker system prune**|This will let you delete **all** the unused or stopped containers/images to free space, therefore, **use with caution**|
+|**docker volume prune -a**|This will let you delete **all** the unused volumes in your docker engine, therefore, **use with caution**|
+|**docker compose --profile zrok up -d --build**|This will let you rebuild and rerun the entire project in case you made changes to the source code or the config file|
+
+In case you're experiencing problems with Zrok you may need to re-create the volume with the new `.env` file configuration, so make sure you stop all the containers first, then you delete all the containers, and finally you delete the volume\
+**If attempt to delete the docker volumes but you don't follow the order specified above, Docker won't let you delete the volume that contains your old Zrok configuration so the new Zrok values in the `.env` file won't take effect**
