@@ -17,29 +17,19 @@ In this particular case, we will create and then listen to a custom channel poin
 The tool listens to Twitch so when a chatter uses a determined channel point redemption, it lets Spotify know that a song should be added to the queue
 
 ## Limitations
-<details>
-These are dropdown windows
-<summary>You must have a premium Spotify account</summary>
 
+1. **You must have a premium Spotify account**\
 The free Spotify plan is subject to multiple restrictions that will interfere with the tool, this is why a premium subscription is needed. However, please note that any premium plan will work. You can find more details about the plans in the [official Spotify plans page](https://www.spotify.com/co-en/premium/)
-</details>
-<details>
-<summary>You must be Twitch affiliate or partner</summary>
 
+2. **You must be Twitch affiliate or partner**\
 In the current state of the project we use channel point redemptions to allow chatters to send in their song requests, and in order to be able to have access to channel points in your channel you must be at least a Twitch affiliate. In case you're not familiar with the program, please visit the official Twitch article on [How to become an affiliate](https://help.twitch.tv/s/article/joining-the-affiliate-program) that will walk you through the requirements and steps to become one
-</details>
-<details>
-<summary>You must have a machine to host the tool</summary>
 
+3. **You must have a machine to host the tool**\
 It can be in your own PC or on a server but the tool needs somewhere to run. To make this process more user-friendly the project was developed with [Docker](https://www.docker.com/) in mind, so it can be easy to host regardless of the platform and operating system you're working on
-</details>
-<details>
-<summary>The tool can be hosted for up to 25 different Spotify accounts</summary>
 
-Given that the project revolves around self-hosting, our tool will use the [development quota mode](https://developer.spotify.com/documentation/web-api/concepts/quota-modes) that Spotify offers, which allows up to 25 unique Spotify accounts to use the tool simultaneously.
-
+4. **The tool can be hosted for up to 25 different Spotify accounts**\
+Given that the project revolves around self-hosting, our tool will use the [development quota mode](https://developer.spotify.com/documentation/web-api/concepts/quota-modes) that Spotify offers, which allows up to 25 unique Spotify accounts to use the tool simultaneously.\
 It is possible to increase said limit but you would have to apply for the extended mode following Spotify's guidelines and since this is out of the project's scope and it's subject to changes, it will not be explained in this guide
-</details>
 
 ## How to setup the tool
 
@@ -78,7 +68,7 @@ My code isn't the best, so if you would like to improve it here are some general
 - As I said earlier, my code isn't the best, but please do not create a massive code refactor in a single pull request. If you plan to rebuild a big portion of the code please consider forking the project or submitting the changes progressively in small implementations
 
 <details>
-<summary><b>Brief guide on how to install the hooks</b></summary>
+<summary><b>Click here to know how to install and use the hooks</b></summary>
 
 If you plan on editing and contributing code, it is highly recommended to use the pre-commit hooks. This is particularly useful to ensure a consistent code style, making it more readable and maintainable:
 
@@ -104,7 +94,7 @@ The entire documentation of the project lies in what you're currently reading, s
 To test and run everything locally, all you need to have is Docker installed and run the compose file, however, you can run everything separately by having Python, Nodejs, Redis and the Zrok CLI tool in your environment
 
 <details>
-<summary><b>Breakdown of each requirement</b></summary>
+<summary><b>Click here to see the breakdown of each requirement</b></summary>
 
 |Requirement|Usage|
 |-|-|
