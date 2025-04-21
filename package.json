@@ -1,0 +1,16 @@
+{
+  "devDependencies": {
+    "parcel": "^2.14.0",
+    "parcel-reporter-static-files-copy": "^1.5.3"
+  },
+  "name": "parcel-vanilla-starter",
+  "private": true,
+  "scripts": {
+    "build": "parcel build static/template/*.html --dist-dir dist --no-cache",
+    "start": "parcel static/template/*.html --dist-dir dist --port 5000 --no-cache"
+  },
+  "staticFiles": {
+    "staticPath": "static/public"
+  },
+  "version": "0.0.0"
+}
