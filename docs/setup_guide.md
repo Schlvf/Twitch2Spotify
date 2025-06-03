@@ -1,26 +1,33 @@
 # Detailed setup guide
 
 ## Disclaimer
-You're not expected to have any programming knowledge or background to complete this guide since the process is simple and linear, but the guide itself will be long. Also, this was written on April of 2025 so things may have changed and look different on your end, but they should work in the same way
 
-## Pre-requirements:
-### Install Docker:
-If you're on Windows or Mac you're defaulted to use Docker Desktop, but Linux users can choose to only install the Docker engine instead if you don't want the UI application
+You're not expected to have any programming knowledge or background to complete this guide since the process is simple and linear, but the guide itself will be long. Also, this was written on April 2025 so things may have changed and look different on your end, but they should work in the same way
+
+## Pre-requirements
+
+### Install Docker
+
+If you're on Windows or Mac you're defaulted to using Docker Desktop, but Linux users can choose to only install the Docker engine instead if you don't want the UI application
 
 This process itself varies depending on your operating system, so please make sure to visit the [official Docker installation guide](https://docs.Docker.com/get-started/get-Docker/) and come back here once you're done
 
 If you're on `Mac` or `Windows`, you will need to reboot your system after you install Docker
 
-### Clone the repository:
+### Clone the repository
+
 If you know what `git` is and you have it installed simply run `git clone https://github.com/Schlvf/Twitch2Spotify.git`
 
 If you don't have `git` please follow these steps:
+
 1. Go to the main screen in the repository and click on the green button with the text `<> Code`
-2. Click on `Download as zip`
-3. Create a folder in your computer or server and decompress the zip file inside the folder
+2. Click on `Download zip`
+3. Create a folder in your computer or server and extract the zip file inside the folder
 
 ## Setup
+
 ### STEP 1 - The configuration file
+
 Regardless of the deployment method you will choose later on, you must prepare a **`.env`** file that will help you set the basic configuration needed to run the project so start by creating a new file and name it `.env`
 
 Once created copy and paste the example from below. We will be editing these values as we progress in the guide
@@ -71,9 +78,9 @@ This is a detailed breakdown of each configuration variable that our `.env` file
 |**ssl_key_file**|*(Optional)* This must be the path to your SSL key file|
 |**ssl_cert_file**|*(Optional)* Same as above, but with the cert file|
 
-You can leave empty the `ssl_key_file` and `ssl_cert_file` if you're using Zrok
+You can leave empty the `ssl_key_file` and `ssl_cert_file` if you are using Zrok
 
-#### Now lets make the first changes to the config file
+#### Now let's make the first changes to the config file
 
 For `sudo_auth` and `twitch_hmac_secret` we need to make a passcode composed of only alphabet letters and numbers with at least 12 characters in total\
 If you want some help creating secure passcodes you can use a generator like [LastPass](https://www.lastpass.com/features/password-generator) but make sure that you **disable symbols** so it doesn't include any special characters
@@ -89,7 +96,8 @@ twitch_hmac_secret = 7ZsSx5hm12v7
 ...
 ```
 
-### STEP 2 - Setting up Zrok:
+### STEP 2 - Setting up Zrok
+
 #### *(If you have your own domain and SSL certificates you can skip this step)*
 
 Both the Twitch and Spotify APIs require you to be able to expose the webhook on a static HTTPS domain\
@@ -98,16 +106,15 @@ This can be achieved by owning your own web domain and SSL certificates, or in t
 The reason why Zrok was chosen over all the other available options is because it was the most suitable for our specific use case as it allows you to have a reserved domain with certificates for free and it is highly compatible with Docker environments\
 The only downside of Zrok is that you can only transfer 5Gb of data daily, but this is something that shouldn't be an issue since we will be making and receiving simple HTTP requests and you would need hundreds of thousands of them to reach that limit
 
-1. The first thing you must do is visit the [official Zrok website](https://zrok.io/) and creating your account\
+1. The first thing you must do is visit the [official Zrok website](https://zrok.io/) and create your account\
 You can do this by clicking on `Get started` and then clicking on `Account`
 
-2. Once you've created your account, you'll receive a verification email. Just go to your inbox and follow the steps in said message
+2. Once you've created your account, you'll receive a verification email. Follow the instructions in the email
 
 3. Now you should have access to both the [Zrok dashboard](https://myzrok.io/dashboard) and the [Zrok API web console](https://api.zrok.io/) so let's start by visiting the web console
 
 4. In the web console you will have a tab that will display your `Environments` that should be empty, and right next to it there should be a tab called `Detail`. Once you've found it, click on it and then reveal and copy the `Token` right under your email and replace it in the `.env` file\
 Example: `ZROK_ENABLE_TOKEN = L18IWW083N6`
-
 
 5. Now you need to define the unique subdomain name that you want. This will be reflected in the URL that you will use to access the tool dashboard.\
 For instance, if the name you choose is `toaster`, the URL that Zrok gives you will be `https://toaster.share.zrok.io`\
@@ -141,7 +148,8 @@ app_subdomain = https://toaster.share.zrok.io
 ...
 ```
 
-### STEP 3 - Setting up Twitch:
+### STEP 3 - Setting up Twitch
+
 We need to create a Twitch App in the Twitch developer portal and update our `.env` file accordingly
 
 1. Visit the [Twitch developer portal](https://dev.twitch.tv/) and log into your account
@@ -152,14 +160,14 @@ We need to create a Twitch App in the Twitch developer portal and update our `.e
 |Field|Value|
 |-|-|
 |Name|Just give it a name of your preference like `MusicApp`|
-|OAuth Redirect URLs|Copy and paste the Zrok URL making sure that you replace the subdomain with the one you intended to reserve and you add at the end `/eventsub/auth`. *(This can be updated later)*. Example: `https://toaster.share.zrok.io/eventsub/auth`|
+|OAuth Redirect URLs|Copy and paste the Zrok URL, making sure that you replace the subdomain with the one you intended to reserve and you add at the end `/eventsub/auth`. *(This can be updated later)*. Example: `https://toaster.share.zrok.io/eventsub/auth`|
 |Category|Select `Application Integration`|
 |Client Type|Select `Confidential`|
 
 5. Once created you will be able to see it in your console page, so now click on `Manage`
 6. Copy the `Client id` and replace it in the `.env` file\
 Example: `twitch_app_id = n5b7yckjnriy10vrl9bu6l804cyj`
-7. Click on `New secret` to generate a new secret, then copy it and replace it in the `.env` file\
+7. Click `New secret` to generate a new secret, then copy it and paste it in the `.env` file\
 Example: `twitch_app_secret = tx6wm3rkfebg6u4cyvisx2935nl`
 
 If you did everything correctly, the new values in your `.env` file should look like this:
@@ -173,12 +181,13 @@ twitch_app_secret = tx6wm3rkfebg6u4cyvisx2935nl
 ...
 ```
 
-### STEP 4 - Setting up Spotify:
+### STEP 4 - Setting up Spotify
+
 We need to create a Spotify App in the Spotify developer portal and update our `.env` file accordingly
 
 1. Visit the [Spotify developer portal](https://developer.spotify.com/) and log into your account
 2. Once logged in, click on your profile photo in the top right and then click on `Dashboard`
-3. Click on the `Create app` on the right
+3. Click on `Create app` on the right
 4. Fill the fields with the following information:
 
 |Field|Value|
@@ -211,6 +220,7 @@ spotify_app_secret = tx6wm3rkfebg6u4cyvisx2935nl
 ```
 
 ### STEP 5 - Building and running the tool
+
 Assuming all the steps from above were completed, all you have to do is run the following Docker command in your terminal:\
 `docker compose --profile zrok up -d`
 
