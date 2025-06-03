@@ -56,6 +56,7 @@ From here onwards everything will be pretty intuitive and self explanatory so do
 Before you can use anything in the site you will need to authorize the tool by logging in with Twitch. This will redirect you to the official Twitch authorization site so please read and follow the steps they indicate you to do
 
 Once you've logged in with your Twitch account you will see something like this:
+
 ![ug3](static/ug3.png)
 
 From here you will be able to authorize Spotify and enable or disable the channel point redeem, but assuming it's the first time you're here, you can follow the steps below to leave everything functional
