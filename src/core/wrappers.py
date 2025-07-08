@@ -32,7 +32,7 @@ def time_diff(func):
             print(f"REDIS - Task ended after {time_delta.total_seconds()} seconds")
             return res
         except Exception as e:
-            # logger.error(e, extra={"Error class: ": type(e)})
+            logger.error(e, extra={"Error class: ": type(e)})
             raise e
 
     return wrapper

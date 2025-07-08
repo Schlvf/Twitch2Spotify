@@ -16,6 +16,8 @@ def solve_event(event: Event):
     event_type = event.subscription.type
 
     if event_type == "channel.channel_points_custom_reward_redemption.add":
+        print(f"    Requester : {event.event.user_name}")
+        print(f"    Input : {event.event.user_input}")
         solve_channel_points_event(event=event)
         return
 

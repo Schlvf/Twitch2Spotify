@@ -1,3 +1,5 @@
+from datetime import datetime
+from datetime import timezone
 from typing import Annotated
 
 from fastapi import Header
@@ -12,3 +14,7 @@ async def sudo_auth(sudo_auth: Annotated[str | None, Header()] = None):
         return_status_response(status_code=401)
     if sudo_auth != EnvWrapper().SUDO_AUTH:
         return_status_response(status_code=403)
+
+
+async def time_stamp():
+    print(f"\n\n{datetime.now(timezone.utc)}")

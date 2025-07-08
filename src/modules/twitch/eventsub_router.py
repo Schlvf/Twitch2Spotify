@@ -9,6 +9,7 @@ from api import get_spotify_auth_url
 from api import get_spotify_code_url
 from api import ResponseMessage
 from api import sudo_auth
+from api import time_stamp
 
 from .event_handler import solve_event
 from .eventsub_handler import authorize_twitch_user
@@ -26,7 +27,12 @@ router = APIRouter(prefix="/eventsub")
 templates = Jinja2Templates(directory="dist")
 
 
-@router.post("/callback", status_code=200, response_class=PlainTextResponse)
+@router.post(
+    "/callback",
+    status_code=200,
+    response_class=PlainTextResponse,
+    dependencies=[Depends(time_stamp)],
+)
 async def callback_endpoint(
     request: Request,
     response: Response,
@@ -34,24 +40,24 @@ async def callback_endpoint(
 ):
     rawbody = await request.body()
     if not authenticate_hmac(request=request, rawbody=rawbody.decode()):
-        print("\n*** UNAUTHORIZED PETITION ***")
+        print("*** UNAUTHORIZED PETITION ***")
         response.status_code = 401
         return
 
     if check_dup_events(event=event):
-        print("\n*** SKIPPING DUP ***")
+        print("*** SKIPPING DUP ***")
         return
 
     event_type = request.headers.get("Twitch-Eventsub-Message-Type")
 
     if event_type == "notification":
-        print("\n*** SUBSCRIPTION RECEIVED ***")
+        print("*** SUBSCRIPTION RECEIVED ***")
         solve_event(event=event)
     if event_type == "webhook_callback_verification":
-        print("\n*** CHALLENGE RECEIVED ***")
+        print("*** CHALLENGE RECEIVED ***")
         return event.challenge
     if event_type == "revocation":
-        print("\n*** REVOCATION RECEIVED ***")
+        print("*** REVOCATION RECEIVED ***")
     return
 
 
